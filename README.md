@@ -1,4 +1,4 @@
-# Runc
+# Ruc
 
 Short for run code
 
@@ -6,20 +6,21 @@ Short for run code
 
 * `make install` to install.
   * configure install directory in `config.mk`
-* `runc LANG` will open the system editor with a quick-start code snippet (where
+  * or by using the `DESTDIR` and `PREFIX` environment variables
+* `ruc LANG` will open the system editor with a quick-start code snippet (where
   applicable). Write code in the specified `LANG`. Closing the editor will
   execute the code.
-* `runc --help` for other options
+* `ruc --help` for other options
 
 ### History
 
 * by default the edited file is cached
-  * so that using `runc LANG` with the same language will bring back the same
+  * so that using `ruc LANG` with the same language will bring back the same
     file
-* `runc LANG -n` will clear old file and just use the default snippet
-* `runc LANG -t` will not use the history file for the current invocation and
+* `ruc LANG -n` will clear old file and just use the default snippet
+* `ruc LANG -t` will not use the history file for the current invocation and
   will not cache current invocation
-  * the next `runc LANG` will use the previous cache file
+  * the next `ruc LANG` will use the previous cache file
 
 ## Why?
 

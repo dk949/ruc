@@ -115,7 +115,7 @@ class Runner:
 """
     _NO_PROGRAM: Final[None] = None
     _TAB: Final[str] = "    "
-    _CACHE_NAME: Final[str] = "runc_cache"
+    _CACHE_NAME: Final[str] = "ruc_cache"
 
     _snippets: dict[str, str] = {
         "asm":
@@ -166,7 +166,7 @@ int main(int argc, const char **argv) {
         "c#":
         """using System;
 
-namespace Runc {
+namespace Ruc {
     class Runner {
         static void Main(string[] args) {
 
@@ -202,7 +202,7 @@ main = undefined
 """,
         "java":
         """
-class Runc {
+class Ruc {
 
     public static void main(String[] args){
 
@@ -397,7 +397,7 @@ pub fn main() void {
             return ''.join(out)
 
     def _makeFile(self, newHist: bool) -> str:
-        with open(os.path.join(tempfile.gettempdir(), f"runc_runner{self._langs[self._lang]['extension']}"), "w") as f:
+        with open(os.path.join(tempfile.gettempdir(), f"ruc_runner{self._langs[self._lang]['extension']}"), "w") as f:
             self._usedFiles.append(f.name)
             f.write(self._loadHist(newHist))
             return f.name
@@ -536,7 +536,7 @@ def genEpilog() -> str:
 
 
 def parseArgs() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog="runc", description="Open the EDITOR. Write some code. Have it executed.", epilog=genEpilog(),
+    parser = argparse.ArgumentParser(prog="ruc", description="Open the EDITOR. Write some code. Have it executed.", epilog=genEpilog(),
                                      formatter_class=argparse.RawDescriptionHelpFormatter, exit_on_error=False)
     parser.add_argument('--temp', '-t', dest='noHist', action='store_true',
                         help='ignore history and use default snippet')
