@@ -551,7 +551,7 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument('--ls', '-l', action="store_true",
                         help="list available languages")
     parser.add_argument('--aliases', '-a', action="store_true",
-                        help="list available languages")
+                        help="list available aliases")
     parser.add_argument('--version', '-v', action="version", version=VERSION,
                         help="print program version")
 
