@@ -9,6 +9,7 @@ import sys
 import tempfile
 import shutil
 
+VERSION = "unknown"
 
 class ExitCode(IntEnum):
     INTERNAL_ERROR = -1
@@ -551,6 +552,8 @@ def parseArgs() -> argparse.Namespace:
                         help="list available languages")
     parser.add_argument('--aliases', '-a', action="store_true",
                         help="list available languages")
+    parser.add_argument('--version', '-v', action="version", version=VERSION,
+                        help="print program version")
 
     return parser.parse_args()
 
