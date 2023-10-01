@@ -34,11 +34,8 @@ fi
 
 # exit code 0 means it is not staged
 if git diff --quiet --staged Cargo.toml; then
-    git add Cargo.toml
-fi
-
-if git diff --quiet --staged Cargo.lock; then
-    git add Cargo.toml
+    echo "Cargo.toml is not staged"
+    exit 1
 fi
 
 # shellcheck disable=SC2009 # in this case ps | grep is the right choice
