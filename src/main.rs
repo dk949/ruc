@@ -425,12 +425,6 @@ impl Runner {
     }
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
-macro_rules! RUNNERS {
-    (19)  => { "python" };
-    (len) => { 19 };
-}
-
 struct Runners {
     runners: &'static [Runner],
 }
@@ -438,7 +432,11 @@ struct Runners {
 impl Runners {
     fn new() -> Self {
         Runners {
-            runners: &[include!(concat!("runners/", RUNNERS![19]))],
+            runners: &[
+                include!("runners/python"),
+                include!("runners/ruby"),
+                include!("runners/perl"),
+            ],
         }
     }
     fn get<'a>(self: &Self, name: &'a str, lang: &'a str) -> Option<Error<&'a Runner>> {

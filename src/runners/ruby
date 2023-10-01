@@ -1,0 +1,13 @@
+Runner {
+    name: "ruby",
+    extension: "rb",
+    exe_idx: 0,
+    exe_deps: &["ruby"],
+    other_deps: &[],
+    supported_langs: &["ruby"],
+    default_for: &["ruby"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
