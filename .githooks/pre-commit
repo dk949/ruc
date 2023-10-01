@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 get_ver() {
     awk -F- '
@@ -19,10 +20,30 @@ get_ver() {
     '
 }
 
+cargo_toml_ver=$(awk '/version/ {print gensub(/^.*"([^"]*)".*$/, "\\1", "g")}' Cargo.toml )
+if [ -f Cargo.lock ]; then
+    cargo_lock_ver=$(awk '/name\s*=\s*"ruc"/{p=1} $0 ~ /version/ && p { print gensub(/^.*"([^"]*)".*$/, "\\1", "g"); p = 0}' Cargo.lock)
 
+    if ! [ "$cargo_lock_ver" = "$cargo_toml_ver" ]; then
+        cargo generate-lockfile --offline
+        git add Cargo.lock
+    fi
+fi
+
+
+
+# exit code 0 means it is not staged
+if git diff --quiet --staged Cargo.toml; then
+    git add Cargo.toml
+fi
+
+if git diff --quiet --staged Cargo.lock; then
+    git add Cargo.toml
+fi
+
+# shellcheck disable=SC2009 # in this case ps | grep is the right choice
 awk \
     -v git_ver="$(git describe | get_ver)" \
-    -v cargo_ver="$(awk '/version/ {print gensub(/^.*"([^"]*)".*$/, "\\1", "g")}' Cargo.toml | get_ver)" \
+    -v cargo_ver="$(echo "$cargo_toml_ver" | get_ver)" \
     -v amend="$(ps -ocommand= -p $PPID | grep -e '--amend' > /dev/null && echo 1 || echo 0)" \
     -f .githooks/version_compare.awk.sample
-
