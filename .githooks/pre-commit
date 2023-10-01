@@ -19,7 +19,10 @@ get_ver() {
     '
 }
 
+
 awk \
     -v git_ver="$(git describe | get_ver)" \
     -v cargo_ver="$(awk '/version/ {print gensub(/^.*"([^"]*)".*$/, "\\1", "g")}' Cargo.toml | get_ver)" \
+    -v amend="$(ps -ocommand= -p $PPID | grep -e '--amend' > /dev/null && echo 1 || echo 0)" \
     -f .githooks/version_compare.awk.sample
+
