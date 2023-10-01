@@ -436,6 +436,9 @@ impl Runners {
                 include!("runners/python"),
                 include!("runners/ruby"),
                 include!("runners/perl"),
+                include!("runners/lua"),
+                include!("runners/node"),
+                include!("runners/php"),
             ],
         }
     }
