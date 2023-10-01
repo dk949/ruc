@@ -1,0 +1,25 @@
+#!/bin/sh
+
+get_ver() {
+    awk -F- '
+    {
+        split($1, ver_arr, ".")
+        if (ver_arr[1] ~ /^v/)
+            ver = substr(ver_arr[1],2)
+        else
+            ver = ver_arr[1]
+        ver = ver " " ver_arr[2] " " ver_arr[3]
+        printf ver
+        if ($2) {
+            print " " $2
+        } else {
+            print ""
+        }
+    }
+    '
+}
+
+awk \
+    -v git_ver="$(git describe | get_ver)" \
+    -v cargo_ver="$(awk '/version/ {print gensub(/^.*"([^"]*)".*$/, "\\1", "g")}' Cargo.toml | get_ver)" \
+    -f .githooks/version_compare.awk.sample
