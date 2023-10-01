@@ -803,7 +803,7 @@ fn editor(user_editor: &String) -> Error<String> {
 fn run_editor(editor: &str, file: &str) -> Error<()> {
     let res = Command::new(editor)
         .arg(file)
-        .stdin(Stdio::null())
+        .stdin(Stdio::inherit())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .output()
