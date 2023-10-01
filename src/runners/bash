@@ -1,0 +1,13 @@
+Runner {
+    name: "bash",
+    extension: "sh",
+    exe_idx: 0,
+    exe_deps: &["bash"],
+    other_deps: &[],
+    supported_langs: &["sh"],
+    default_for: &["sh"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

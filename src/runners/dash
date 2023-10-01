@@ -1,0 +1,13 @@
+Runner {
+    name: "dash",
+    extension: "sh",
+    exe_idx: 0,
+    exe_deps: &["dash"],
+    other_deps: &[],
+    supported_langs: &["sh"],
+    default_for: &[],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

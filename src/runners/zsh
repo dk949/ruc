@@ -1,0 +1,13 @@
+Runner {
+    name: "zsh",
+    extension: "sh",
+    exe_idx: 0,
+    exe_deps: &["zsh"],
+    other_deps: &[],
+    supported_langs: &["sh"],
+    default_for: &[],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
