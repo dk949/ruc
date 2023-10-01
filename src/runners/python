@@ -1,0 +1,13 @@
+Runner {
+    name: "python",
+    extension: "py",
+    exe_idx: 0,
+    exe_deps: &["python3", "python"],
+    other_deps: &[],
+    supported_langs: &["python"],
+    default_for: &["python"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

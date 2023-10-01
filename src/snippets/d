@@ -1,0 +1,7 @@
+import std.stdio, std.range, std.algorithm;
+
+int main(){
+
+
+    return 0;
+}
