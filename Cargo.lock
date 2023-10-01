@@ -98,7 +98,7 @@ dependencies = [
 
 [[package]]
 name = "ruc"
-version = "1.0.2-10"
+version = "1.0.2-11"
 dependencies = [
  "dirs",
 ]

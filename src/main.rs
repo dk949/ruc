@@ -432,14 +432,7 @@ struct Runners {
 impl Runners {
     fn new() -> Self {
         Runners {
-            runners: &[
-                include!("runners/python"),
-                include!("runners/ruby"),
-                include!("runners/perl"),
-                include!("runners/lua"),
-                include!("runners/node"),
-                include!("runners/php"),
-            ],
+            runners: include!(concat!(env!("OUT_DIR"), "/runners_list")),
         }
     }
     fn get<'a>(self: &Self, name: &'a str, lang: &'a str) -> Option<Error<&'a Runner>> {
@@ -501,106 +494,14 @@ impl Runners {
     }
 }
 
-/// Needed to have access to language names as string literals for include_str
-#[cfg_attr(rustfmt, rustfmt_skip)]
-macro_rules! LANGS {
-    (0)   => { "asm" };
-    (1)   => { "bash" };
-    (2)   => { "c" };
-    (3)   => { "c++" };
-    (4)   => { "c#" };
-    (5)   => { "cmake" };
-    (6)   => { "coffeescript" };
-    (7)   => { "d" };
-    (8)   => { "dash" };
-    (9)   => { "fortran" };
-    (10)  => { "go" };
-    (11)  => { "haskell" };
-    (12)  => { "java" };
-    (13)  => { "javascript" };
-    (14)  => { "lua" };
-    (15)  => { "ocaml" };
-    (16)  => { "perl" };
-    (17)  => { "php" };
-    (18)  => { "purescript" };
-    (19)  => { "python" };
-    (20)  => { "ruby" };
-    (21)  => { "rust" };
-    (22)  => { "sh" };
-    (23)  => { "scala" };
-    (24)  => { "scheme" };
-    (25)  => { "typescript" };
-    (26)  => { "wasm" };
-    (27)  => { "zig" };
-    (28)  => { "zsh" };
-    (len) => { 29 };
+include!(concat!(env!("OUT_DIR"), "/lang_macro"));
 
-    (check, "asm")          => {"asm"};
-    (check, "bash")         => {"bash"};
-    (check, "c")            => {"c"};
-    (check, "c++")          => {"c++"};
-    (check, "c#")           => {"c#"};
-    (check, "cmake")        => {"cmake"};
-    (check, "coffeescript") => {"coffeescript"};
-    (check, "d")            => {"d"};
-    (check, "dash")         => {"dash"};
-    (check, "fortran")      => {"fortran"};
-    (check, "go")           => {"go"};
-    (check, "haskell")      => {"haskell"};
-    (check, "java")         => {"java"};
-    (check, "javascript")   => {"javascript"};
-    (check, "lua")          => {"lua"};
-    (check, "ocaml")        => {"ocaml"};
-    (check, "perl")         => {"perl"};
-    (check, "php")          => {"php"};
-    (check, "purescript")   => {"purescript"};
-    (check, "python")       => {"python"};
-    (check, "ruby")         => {"ruby"};
-    (check, "rust")         => {"rust"};
-    (check, "sh")           => {"sh"};
-    (check, "scala")        => {"scala"};
-    (check, "scheme")       => {"scheme"};
-    (check, "typescript")   => {"typescript"};
-    (check, "wasm")         => {"wasm"};
-    (check, "zig")          => {"zig"};
-    (check, "zsh")          => {"zsh"};
-}
-
-const LANGS: [&str; LANGS!(len)] = [
-    LANGS![0],
-    LANGS![1],
-    LANGS![2],
-    LANGS![3],
-    LANGS![4],
-    LANGS![5],
-    LANGS![6],
-    LANGS![7],
-    LANGS![8],
-    LANGS![9],
-    LANGS![10],
-    LANGS![11],
-    LANGS![12],
-    LANGS![13],
-    LANGS![14],
-    LANGS![15],
-    LANGS![16],
-    LANGS![17],
-    LANGS![18],
-    LANGS![19],
-    LANGS![20],
-    LANGS![21],
-    LANGS![22],
-    LANGS![23],
-    LANGS![24],
-    LANGS![25],
-    LANGS![26],
-    LANGS![27],
-    LANGS![28],
-];
+include!(concat!(env!("OUT_DIR"), "/lang_list"));
 
 type Aliases = HashMap<&'static str, &'static str>;
 fn aliases() -> Aliases {
     HashMap::from([
+        ("bash", LANGS!(check, "sh")),
         ("coffee", LANGS!(check, "coffeescript")),
         ("cpp", LANGS!(check, "c++")),
         ("cs", LANGS!(check, "c#")),
@@ -625,38 +526,7 @@ fn aliases() -> Aliases {
 
 type Snippets = HashMap<&'static str, &'static str>;
 fn snippets() -> Snippets {
-    const _: () = assert!(LANGS!(len) == 29);
-    HashMap::from([
-        (LANGS![0], include_str!(concat!("snippets/", LANGS![0]))),
-        (LANGS![1], include_str!(concat!("snippets/", LANGS![1]))),
-        (LANGS![2], include_str!(concat!("snippets/", LANGS![2]))),
-        (LANGS![3], include_str!(concat!("snippets/", LANGS![3]))),
-        (LANGS![4], include_str!(concat!("snippets/", LANGS![4]))),
-        (LANGS![5], include_str!(concat!("snippets/", LANGS![5]))),
-        (LANGS![6], include_str!(concat!("snippets/", LANGS![6]))),
-        (LANGS![7], include_str!(concat!("snippets/", LANGS![7]))),
-        (LANGS![8], include_str!(concat!("snippets/", LANGS![8]))),
-        (LANGS![9], include_str!(concat!("snippets/", LANGS![9]))),
-        (LANGS![10], include_str!(concat!("snippets/", LANGS![10]))),
-        (LANGS![11], include_str!(concat!("snippets/", LANGS![11]))),
-        (LANGS![12], include_str!(concat!("snippets/", LANGS![12]))),
-        (LANGS![13], include_str!(concat!("snippets/", LANGS![13]))),
-        (LANGS![14], include_str!(concat!("snippets/", LANGS![14]))),
-        (LANGS![15], include_str!(concat!("snippets/", LANGS![15]))),
-        (LANGS![16], include_str!(concat!("snippets/", LANGS![16]))),
-        (LANGS![17], include_str!(concat!("snippets/", LANGS![17]))),
-        (LANGS![18], include_str!(concat!("snippets/", LANGS![18]))),
-        (LANGS![19], include_str!(concat!("snippets/", LANGS![19]))),
-        (LANGS![20], include_str!(concat!("snippets/", LANGS![20]))),
-        (LANGS![21], include_str!(concat!("snippets/", LANGS![21]))),
-        (LANGS![22], include_str!(concat!("snippets/", LANGS![22]))),
-        (LANGS![23], include_str!(concat!("snippets/", LANGS![23]))),
-        (LANGS![24], include_str!(concat!("snippets/", LANGS![24]))),
-        (LANGS![25], include_str!(concat!("snippets/", LANGS![25]))),
-        (LANGS![26], include_str!(concat!("snippets/", LANGS![26]))),
-        (LANGS![27], include_str!(concat!("snippets/", LANGS![27]))),
-        (LANGS![28], include_str!(concat!("snippets/", LANGS![28]))),
-    ])
+    include!(concat!(env!("OUT_DIR"), "/snippet_map"))
 }
 fn get_snippet<'a>(snippets: &'a Snippets, lang: &'a str) -> Error<&'a str> {
     Ok(*snippets.get(lang).ok_or_else(|| {
@@ -788,7 +658,11 @@ fn cleanup_temp() {
 fn editor(user_editor: &String) -> Error<String> {
     let editor = if user_editor.is_empty() {
         env::var_os("EDITOR")
-            .ok_or_else(|| dieo!(Codes::EditorError, "Could not determine which editor to use, try setting the EDITOR environment variable or using the -e flag."))?
+            .ok_or_else(|| dieo!(
+                    Codes::EditorError,
+                    "Could not determine which editor to use, try setting the EDITOR environment variable or using the -e flag."
+                    )
+                )?
             .to_string_lossy()
             .to_string()
     } else {
