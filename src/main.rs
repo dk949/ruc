@@ -825,15 +825,6 @@ fn program(args: Args) -> Error<()> {
     let hist_path = setup_hist(args.hist, lang, runner.name, runner.extension, snippet)?;
     let editor = editor(&args.editor)?;
 
-    println!("lang = {lang}");
-    println!(
-        "runner = {}, executable = {}",
-        runner.name,
-        runner.get_exe()
-    );
-    println!("snippet =\n{snippet}");
-    println!("hist path = {}", hist_path.to_string_lossy());
-    println!("editor = {}", &editor);
     run_editor(&editor, &hist_path.as_os_str().to_string_lossy())?;
     runner.run(&hist_path, &args.compiler_args, &args.prog_args)?;
     Ok(())
