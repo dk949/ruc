@@ -70,3 +70,18 @@ Most languages came from
 | :ballot_box_with_check: | WebAssembly     |          |            |                 |           |            |                   |
 | :ballot_box_with_check: | Zig             |          |            |                 |           |            |                   |
 | :ballot_box_with_check: | Zsh             |          |            |                 |           |            |                   |
+
+
+## Development
+
+You will need the [rust toolchain](https://www.rust-lang.org/tools/install) to
+compile the project.
+
+Running `cargo build` should build everything.
+
+This project uses a pre-commit hook in order to check that the project version
+in `Cargo.toml` has been updated, please run the following to enable the hook
+
+```sh
+git config --local core.hooksPath .githooks/
+```

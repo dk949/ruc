@@ -1,11 +1,10 @@
-function version_print(name, ver){
-    printf name " version = " ver[1]"."ver[2]"."ver[3]
-    if (ver[4]) print "-"ver[4]
-    else        print ""
+function version_str(ver){
+    out =  ver[1]"."ver[2]"."ver[3]
+    if (ver[4]) out = out "-"ver[4]
+    return out
 }
 function print_ver_and_exit(git, cargo) {
-    version_print("git", git)
-    version_print("cargo", cargo)
+    print "cargo version (" version_str(cargo) ") <= git version (" version_str(git) ")"
     exit(1)
 }
 
@@ -39,8 +38,8 @@ BEGIN {
         if (ver_gt(cargo, git))
             exit(0)
     } else {
-    if (cargo[4] == git[4] + 1)
-        exit(0)
+        if (cargo[4] == (git[4] + 1))
+            exit(0)
     }
 
     print "Please update cargo version in accordance with git describe (do not include the hash)"
