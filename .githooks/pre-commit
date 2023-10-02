@@ -31,9 +31,10 @@ if [ -f Cargo.lock ]; then
 fi
 
 
+AMEND="$(ps -ocommand= -p $PPID | grep -e '--amend' > /dev/null && echo 1 || echo 0)"
 
 # exit code 0 means it is not staged
-if git diff --quiet --staged Cargo.toml; then
+if [ "$AMEND" = "0" ] && git diff --quiet --staged Cargo.toml; then
     echo "Cargo.toml is not staged"
     exit 1
 fi
@@ -42,5 +43,5 @@ fi
 awk \
     -v git_ver="$(git describe | get_ver)" \
     -v cargo_ver="$(echo "$cargo_toml_ver" | get_ver)" \
-    -v amend="$(ps -ocommand= -p $PPID | grep -e '--amend' > /dev/null && echo 1 || echo 0)" \
+    -v amend="$AMEND" \
     -f .githooks/version_compare.awk.sample
