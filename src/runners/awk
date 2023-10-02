@@ -1,0 +1,13 @@
+Runner {
+    name: "awk",
+    extension: "awk",
+    exe_idx: 0,
+    exe_deps: &["awk", "gawk"],
+    other_deps: &[],
+    supported_langs: &["awk", ],
+    default_for: &["awk"],
+    setup: &[],
+    exe_args_pre: &["-f", ],
+    exe_args_post: &[],
+    teardown: &[],
+}

@@ -1,0 +1,13 @@
+Runner {
+    name: "dmd",
+    extension: "d",
+    exe_idx: 0,
+    exe_deps: &["dmd", ],
+    other_deps: &[],
+    supported_langs: &["d", ],
+    default_for: &[""],
+    setup: &[],
+    exe_args_pre: &["-run", ],
+    exe_args_post: &[],
+    teardown: &[],
+}

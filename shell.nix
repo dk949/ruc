@@ -11,10 +11,13 @@ pkgs.mkShell {
         pkgs.clojure
         pkgs.coffeescript
         pkgs.dash
+        pkgs.dmd
+        pkgs.gawk
         pkgs.go
         pkgs.guile
         pkgs.jre_minimal
         pkgs.julia
+        pkgs.ldc
         pkgs.lua
         pkgs.nodejs
         pkgs.ocaml
