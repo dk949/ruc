@@ -35,14 +35,17 @@ use std::{env, fs};
 fn main() {
     println!("cargo:rerun-if-changed=src/snippets/");
     println!("cargo:rerun-if-changed=src/runners/");
+    println!("cargo:rerun-if-changed=src/aliases");
 
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let snippets_dir = Path::new(&out_dir).join("snippets");
     let runners_dir = Path::new(&out_dir).join("runners");
+
     let mut lang_macro = fs::File::create(Path::new(&out_dir).join("lang_macro")).unwrap();
     let mut lang_list = fs::File::create(Path::new(&out_dir).join("lang_list")).unwrap();
     let mut snippet_map = fs::File::create(Path::new(&out_dir).join("snippet_map")).unwrap();
     let mut runners_list = fs::File::create(Path::new(&out_dir).join("runners_list")).unwrap();
+    let mut alias_map = fs::File::create(Path::new(&out_dir).join("alias_map")).unwrap();
 
     fs::create_dir_all(&snippets_dir).unwrap();
     fs::create_dir_all(&runners_dir).unwrap();
@@ -110,4 +113,18 @@ fn main() {
     }
 
     runners_list.write_all(b"]\n").unwrap();
+
+    alias_map.write_all(b"HashMap::from([\n").unwrap();
+    for alias in String::from_utf8(fs::read("src/aliases").unwrap())
+        .unwrap()
+        .trim()
+        .split('\n')
+        .map(|line| line.split(':').map(|elem| elem.trim()).collect::<Vec<_>>())
+        .collect::<Vec<_>>()
+    {
+        eprintln!("alias = {alias:?}");
+        // ("yasm", LANGS!(check, "asm")),
+        writeln!(alias_map, "(\"{}\", LANGS!(check, \"{}\")),", alias[0], alias[1]).unwrap();
+    }
+    alias_map.write_all(b"])\n").unwrap();
 }

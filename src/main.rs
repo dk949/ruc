@@ -500,28 +500,7 @@ include!(concat!(env!("OUT_DIR"), "/lang_list"));
 
 type Aliases = HashMap<&'static str, &'static str>;
 fn aliases() -> Aliases {
-    HashMap::from([
-        ("bash", LANGS!(check, "sh")),
-        ("coffee", LANGS!(check, "coffeescript")),
-        ("cpp", LANGS!(check, "c++")),
-        ("cs", LANGS!(check, "c#")),
-        ("csharp", LANGS!(check, "c#")),
-        ("cxx", LANGS!(check, "c++")),
-        ("f90", LANGS!(check, "fortran")),
-        ("hs", LANGS!(check, "haskell")),
-        ("js", LANGS!(check, "javascript")),
-        ("ml", LANGS!(check, "ocaml")),
-        ("nasm", LANGS!(check, "asm")),
-        ("pl", LANGS!(check, "perl")),
-        ("purs", LANGS!(check, "purescript")),
-        ("py", LANGS!(check, "python")),
-        ("rb", LANGS!(check, "ruby")),
-        ("rs", LANGS!(check, "rust")),
-        ("scm", LANGS!(check, "scheme")),
-        ("ts", LANGS!(check, "typescript")),
-        ("wat", LANGS!(check, "wasm")),
-        ("yasm", LANGS!(check, "asm")),
-    ])
+    include!(concat!(env!("OUT_DIR"), "/alias_map"))
 }
 
 type Snippets = HashMap<&'static str, &'static str>;
