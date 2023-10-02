@@ -1,0 +1,13 @@
+Runner {
+    name: "ocaml",
+    extension: "ml",
+    exe_idx: 0,
+    exe_deps: &["ocaml", ],
+    other_deps: &[],
+    supported_langs: &["ocaml", ],
+    default_for: &["ocaml"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
