@@ -85,3 +85,6 @@ in `Cargo.toml` has been updated, please run the following to enable the hook
 ```sh
 git config --local core.hooksPath .githooks/
 ```
+
+The simplest way to add a language is by running the `scripts/add` script or by
+adding/modifying file in `src/runners/` and `src/snippets/`.
