@@ -12,6 +12,7 @@ pkgs.mkShell {
         pkgs.coffeescript
         pkgs.dash
         pkgs.dmd
+        pkgs.dotty
         pkgs.gawk
         pkgs.ghc
         pkgs.go
@@ -27,6 +28,7 @@ pkgs.mkShell {
         pkgs.powershell
         pkgs.python3
         pkgs.ruby
+        pkgs.scala
         pkgs.zig
         pkgs.zsh
 

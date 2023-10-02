@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+/nix/store/*-scala-3*/bin/scala "$@"

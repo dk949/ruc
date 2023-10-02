@@ -1,0 +1,13 @@
+Runner {
+    name: "scala3",
+    extension: "scala",
+    exe_idx: 0,
+    exe_deps: &["scala3", "scala"],
+    other_deps: &[],
+    supported_langs: &["scala", ],
+    default_for: &["scala3",],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
