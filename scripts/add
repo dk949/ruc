@@ -134,6 +134,7 @@ check-extension() {
 
 check-aliases() {
     [ -z "$ALIASES" ] && return
+    [ -z "$LANG_NAME" ] && die 1 "Cannot specify aliases without a language" ||:
     while read -r line; do
         al="$(echo "$line" | sed 's/\s*\([^ ]*\).*/\1/')"
         for i in $ALIASES; do
@@ -143,11 +144,16 @@ check-aliases() {
     done < src/aliases
 }
 
+warn-snippets() {
+    [ -z "$LANG_NAME" ] && [ -n "$SNIPPET" ] && echo "Warning: specifying a snippet with an empty language has no effect" ||:
+}
+
 check-all() {
     check-runner
     check-langs
     check-extension
     check-aliases
+    warn-snippets
 }
 
 quoted-list() {
@@ -164,6 +170,11 @@ quoted-2d-list() {
         printf '&[%s], ' "$(quoted-list "$i")"
     done
     IFS=$old_ifs
+}
+
+opt-quote-comma(){
+    [ -z "$1" ] && return
+    echo "\"$1\","
 }
 
 make-aliases(){
@@ -213,7 +224,7 @@ read-single "Command line arguments to pass after file name"  EXE_ARGS_POST
 read-multiline "Setup steps"          SETUP
 read-multiline "Teardown steps"       TEARDOWN
 
-read-snippet "Default code snippet" SNIPPET
+read-snippet "Default code snippet" SNIPPET && warn-snippets
 
 echo "Runner {
     name: \"$RUNNER_NAME\",
@@ -221,14 +232,14 @@ echo "Runner {
     exe_idx: 0,
     exe_deps: &[$(quoted-list "$EXE_DEPS")],
     other_deps: &[$(quoted-list "$OTHER_DEPS")],
-    supported_langs: &[\"$LANG_NAME\", $(quoted-list "$SUPPORTED_LANGS")],
-    default_for: &[\"$LANG_NAME\"],
+    supported_langs: &[$(opt-quote-comma "$LANG_NAME") $(quoted-list "$SUPPORTED_LANGS")],
+    default_for: &[$(opt-quote-comma "$LANG_NAME")],
     setup: &[$(quoted-2d-list "$SETUP")],
     exe_args_pre: &[$(quoted-list "$EXE_ARGS_PRE")],
     exe_args_post: &[$(quoted-list "$EXE_ARGS_POST")],
     teardown: &[$(quoted-2d-list "$TEARDOWN")],
 }" > "$SCRIPT_DIR/../src/runners/$RUNNER_NAME"
 
-echo "$SNIPPET" | awk '!(NR==1&&$0~/^$/){print}' > "$SCRIPT_DIR/../src/snippets/$LANG_NAME"
+[ -n "$LANG_NAME" ] && echo "$SNIPPET" | awk '!(NR==1&&$0~/^$/){print}' > "$SCRIPT_DIR/../src/snippets/$LANG_NAME"
 
 make-aliases >> "$SCRIPT_DIR/../src/aliases"
