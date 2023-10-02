@@ -1,0 +1,13 @@
+Runner {
+    name: "cmake",
+    extension: "cmake",
+    exe_idx: 0,
+    exe_deps: &["cmake", ],
+    other_deps: &[],
+    supported_langs: &["cmake", ],
+    default_for: &["cmake",],
+    setup: &[],
+    exe_args_pre: &["-P", ],
+    exe_args_post: &[],
+    teardown: &[],
+}

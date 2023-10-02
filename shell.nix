@@ -13,6 +13,7 @@ pkgs.mkShell {
         pkgs.dash
         pkgs.dmd
         pkgs.dotty
+        pkgs.cmakeMinimal
         pkgs.gawk
         pkgs.ghc
         pkgs.go
