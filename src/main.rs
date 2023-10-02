@@ -59,6 +59,8 @@ macro_rules! dieo {
     }}
 }
 
+const HLINE: &str = "――――――――――――――――――――――――――";
+
 #[derive(PartialEq, Clone, Copy)]
 enum Hist {
     Use,
@@ -228,13 +230,13 @@ fn list(kind: List, lang: &str, aliases: &Aliases, runners: &Runners) -> Error<(
     match kind {
         List::None => return Ok(()),
         List::Langs => {
-            println!("Avaliable languages:\n___________________");
+            println!("Avaliable languages:\n{}", HLINE);
             for lang in LANGS {
                 println!("    {lang}");
             }
         }
         List::Aliases => {
-            println!("Avaliable aliases:\n___________________ ");
+            println!("Avaliable aliases:\n{}", HLINE);
             for (alias, lang) in aliases {
                 println!("    {alias} : {lang}");
             }
@@ -244,7 +246,7 @@ fn list(kind: List, lang: &str, aliases: &Aliases, runners: &Runners) -> Error<(
             if !lang.is_empty() {
                 print!(" for {}", lang);
             }
-            println!(":\n___________________ ");
+            println!(":\n{}", HLINE);
             if lang.is_empty() {
                 for runner in runners.runners {
                     print!("    {} : ", runner.name);
@@ -663,7 +665,9 @@ fn run_editor(editor: &str, file: &str) -> Error<()> {
         .output()
         .to_code(editor)?;
 
-    check_status(&[editor], &res, Codes::EditorError)
+    check_status(&[editor], &res, Codes::EditorError)?;
+    println!("Editor exited successfully\n{}\n", HLINE);
+    Ok(())
 }
 
 fn program(args: Args) -> Error<()> {
