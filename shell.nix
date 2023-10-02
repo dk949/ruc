@@ -13,6 +13,7 @@ pkgs.mkShell {
         pkgs.dash
         pkgs.dmd
         pkgs.gawk
+        pkgs.ghc
         pkgs.go
         pkgs.guile
         pkgs.jre_minimal

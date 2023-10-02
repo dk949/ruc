@@ -13,3 +13,4 @@ rb     : ruby
 zsh    : sh
 scm : scheme
 ml : ocaml
+hs : haskell
