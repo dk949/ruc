@@ -106,6 +106,12 @@ read-multiline() {
     readonly "$2=$list"
 }
 
+read-snippet() {
+    [ -n "${!2}" ] && return
+    echo "$1 (press ctrl-D when done): "
+    readonly "$2=$(cat)"
+}
+
 check-langs() {
     [ -z "$LANG_NAME" ] && return
     [ -f "$SCRIPT_DIR/../src/snippets/$LANG_NAME" ] && die 1 "A snippet has already been registered for $LANG_NAME"
@@ -206,7 +212,8 @@ read-single "Command line arguments to pass after file name"  EXE_ARGS_POST
 
 read-multiline "Setup steps"          SETUP
 read-multiline "Teardown steps"       TEARDOWN
-read-multiline "Default code snippet" SNIPPET
+
+read-snippet "Default code snippet" SNIPPET
 
 echo "Runner {
     name: \"$RUNNER_NAME\",
@@ -222,6 +229,6 @@ echo "Runner {
     teardown: &[$(quoted-2d-list "$TEARDOWN")],
 }" > "$SCRIPT_DIR/../src/runners/$RUNNER_NAME"
 
-echo "$SNIPPET" > "$SCRIPT_DIR/../src/snippets/$LANG_NAME"
+echo "$SNIPPET" | awk '!(NR==1&&$0~/^$/){print}' > "$SCRIPT_DIR/../src/snippets/$LANG_NAME"
 
 make-aliases >> "$SCRIPT_DIR/../src/aliases"
