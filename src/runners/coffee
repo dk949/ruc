@@ -1,0 +1,13 @@
+Runner {
+    name: "coffee",
+    extension: "coffee",
+    exe_idx: 0,
+    exe_deps: &["coffee"],
+    other_deps: &[],
+    supported_langs: &["coffeescript"],
+    default_for: &["coffeescript"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

@@ -4,7 +4,10 @@
 pkgs.mkShell {
 
     buildInputs = [
+
+        pkgs.R
         pkgs.bash
+        pkgs.clisp
         pkgs.clojure
         pkgs.coffeescript
         pkgs.dash
@@ -17,7 +20,6 @@ pkgs.mkShell {
         pkgs.python3
         pkgs.ruby
         pkgs.zsh
-        pkgs.R
 
         pkgs.vim
         pkgs.nano
