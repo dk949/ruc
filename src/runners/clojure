@@ -1,0 +1,13 @@
+Runner {
+    name: "clojure",
+    extension: "clj",
+    exe_idx: 0,
+    exe_deps: &["clojure", "clj"],
+    other_deps: &[],
+    supported_langs: &["clojure"],
+    default_for: &["clojure"],
+    setup: &[],
+    exe_args_pre: &["-M"],
+    exe_args_post: &[],
+    teardown: &[],
+}
