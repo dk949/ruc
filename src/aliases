@@ -11,3 +11,4 @@ ps1    : powershell
 py     : python
 rb     : ruby
 zsh    : sh
+scm : scheme

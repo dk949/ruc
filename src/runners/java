@@ -1,0 +1,13 @@
+Runner {
+    name: "java",
+    extension: "java",
+    exe_idx: 0,
+    exe_deps: &["java", ],
+    other_deps: &[],
+    supported_langs: &["java", ],
+    default_for: &["java"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
