@@ -1,0 +1,13 @@
+Runner {
+    name: "r",
+    extension: "R",
+    exe_idx: 0,
+    exe_deps: &["Rscript"],
+    other_deps: &[],
+    supported_langs: &["r"],
+    default_for: &["r"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
