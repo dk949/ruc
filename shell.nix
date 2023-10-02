@@ -11,14 +11,19 @@ pkgs.mkShell {
         pkgs.clojure
         pkgs.coffeescript
         pkgs.dash
+        pkgs.go
+        pkgs.guile
+        pkgs.jre_minimal
         pkgs.julia
         pkgs.lua
         pkgs.nodejs
+        pkgs.ocaml
         pkgs.perl
         pkgs.php
         pkgs.powershell
         pkgs.python3
         pkgs.ruby
+        pkgs.zig
         pkgs.zsh
 
         pkgs.vim
@@ -31,6 +36,7 @@ pkgs.mkShell {
             echo Using "$RUC_EDITOR" as the editor
             export EDITOR="$RUC_EDITOR"
         }
+        PATH="$PWD/scripts/:$PATH"
     '';
 
     RUC_EDITOR = editor;
