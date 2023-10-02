@@ -1,5 +1,0 @@
-program runner
-  implicit none
-
-
-end program runner
