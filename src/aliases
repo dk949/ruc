@@ -14,3 +14,4 @@ zsh    : sh
 scm : scheme
 ml : ocaml
 hs : haskell
+ts : typescript

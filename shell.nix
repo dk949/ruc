@@ -21,6 +21,7 @@ pkgs.mkShell {
         pkgs.julia
         pkgs.ldc
         pkgs.lua
+        pkgs.nodePackages.ts-node
         pkgs.nodejs
         pkgs.ocaml
         pkgs.perl
