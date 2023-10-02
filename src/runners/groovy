@@ -1,0 +1,13 @@
+Runner {
+    name: "groovy",
+    extension: "groovy",
+    exe_idx: 0,
+    exe_deps: &["groovy", ],
+    other_deps: &[],
+    supported_langs: &["groovy", ],
+    default_for: &["groovy",],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

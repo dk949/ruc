@@ -9,14 +9,15 @@ pkgs.mkShell {
         pkgs.bash
         pkgs.clisp
         pkgs.clojure
+        pkgs.cmakeMinimal
         pkgs.coffeescript
         pkgs.dash
         pkgs.dmd
         pkgs.dotty
-        pkgs.cmakeMinimal
         pkgs.gawk
         pkgs.ghc
         pkgs.go
+        pkgs.groovy
         pkgs.guile
         pkgs.jre_minimal
         pkgs.julia
