@@ -130,14 +130,15 @@ fn parse_args() -> Args {
                 Between -l, -a and --list-runners, the last option specified will be used
 
             Exit codes:
-            -1: INTERNAL_ERROR
-            0: OK
-            1: ARGUMENT_ERROR
-            2: LANGUAGE_ERROR
-            3: EDITOR_ERROR
-            4: FILE_ERROR
-            5: RUNNER_ERROR
-            6: CODE_ERROR
+                -1: Internal error
+                 0: OK
+                 1: Argument error
+                 2: Language error
+                 3: Runner error
+                 4: Dependency error
+                 5: Editor error
+                 6: File error
+                 7: Code error
             "#,
             Path::new(&env::args().next().unwrap())
                 .file_name()
@@ -689,7 +690,6 @@ fn program(args: Args) -> Error<()> {
 }
 
 fn main() {
-    concat!("");
     let exit_code = program(parse_args()).map_or_else(identity, |_| Codes::Ok);
     cleanup_temp();
     exit(exit_code)
