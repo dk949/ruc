@@ -1,0 +1,13 @@
+Runner {
+    name: "go",
+    extension: "go",
+    exe_idx: 0,
+    exe_deps: &["go", ],
+    other_deps: &[],
+    supported_langs: &["go", ],
+    default_for: &["go"],
+    setup: &[],
+    exe_args_pre: &["run", ],
+    exe_args_post: &[],
+    teardown: &[],
+}

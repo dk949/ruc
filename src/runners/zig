@@ -1,0 +1,13 @@
+Runner {
+    name: "zig",
+    extension: "zig",
+    exe_idx: 0,
+    exe_deps: &["zig", ],
+    other_deps: &[],
+    supported_langs: &["zig", ],
+    default_for: &["zig"],
+    setup: &[],
+    exe_args_pre: &["run", ],
+    exe_args_post: &[],
+    teardown: &[],
+}

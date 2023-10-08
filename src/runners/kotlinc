@@ -1,0 +1,15 @@
+Runner {
+    name: "kotlinc",
+    extension: "kt",
+    exe_idx: 0,
+    exe_deps: &["java"],
+    other_deps: &[&["kotlinc"]],
+    supported_langs: &["kotlin"],
+    default_for: &["kotlin"],
+    setup: &[
+        &["kotlinc", "%INPUT_FILE%", "-include-runtime", "-d", "%OUTPUT_FILE%.jar"]
+    ],
+    exe_args_pre: &["-jar"],
+    exe_args_post: &[],
+    teardown: &[&["rm", "%OUTPUT_FILE%.jar"]],
+}

@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2001,SC2015
+
+set -e
+
+NL=$'\n'
+SCRIPT_DIR=$(dirname "$0")
+
+dbg() {
+
+    echo "
+    RUNNER_NAME     = $RUNNER_NAME
+    LANG_NAME       = $LANG_NAME
+    EXTENSION       = $EXTENSION
+    EXE_DEPS        = $EXE_DEPS
+    SUPPORTED_LANGS = $SUPPORTED_LANGS
+    DEFAULT_FOR     = $DEFAULT_FOR
+    EXE_ARGS_PRE    = $EXE_ARGS_PRE
+    EXE_ARGS_POST   = $EXE_ARGS_POST
+    OTHER_DEPS      = $OTHER_DEPS
+    SETUP           = $SETUP
+    TEARDOWN        = $TEARDOWN
+    SNIPPET         = $SNIPPET
+    ALIASES         = $ALIASES
+"
+}
+
+die(){
+    CODE="$1"
+    shift
+    echo "$@"
+    exit "$CODE"
+}
+usage(){
+    CODE="$1"
+    shift
+    [ -n "$1" ] && { echo "$1"; echo; }
+    echo "Usage: $(basename "$0") [OPTIONS]
+
+    --runner-name           name of the runner
+    --lang-name             name of the lanugage
+    --extension             extension for the language (no dot)
+    --exe-deps              which executables can be used to run the language
+    --other-deps            what other dependencies does it have
+    --supported-langs       what other languages does this runner support
+    --setup                 list of commands to run before running the language (new-line separated)
+    --exe-args-pre          list of command line arguments to pass to the executable before the file
+    --exe-args-post         list of command line arguments to pass to the executable after the file
+    --teardown              list of commands to run after running the language (new-line separated)
+    --snippet               default code snippet
+    --aliases               list of aliases for the language
+
+    -v, --version           print version and exit
+    -h, --help              print this message and exit
+
+
+    Notes:
+        All lists are space separated unless otherwise indicated
+
+        If some of the options are not specified, the script will run
+        interactively
+"
+    exit "$CODE"
+}
+
+version() {
+    awk '/version/ {print gensub(/^.*"([^"]*)".*$/, "\\1", "g")}' "$SCRIPT_DIR/../Cargo.toml"
+    exit 0
+}
+
+get-var(){
+    [ -z "$2" ] && die 1 "Expected value after $1"
+    readonly "$3=$2"
+}
+
+var-name() {
+    echo "$1" | tr '[:lower:]' '[:upper:]' | tr '-' '_' | cut --complement -c-2
+}
+
+_read-impl() {
+    read -r -p "$1: " var
+    echo "$var" | sed 's/\s\s*/ /g'
+}
+
+read-single(){
+    [ -n "${!2}" ] && return
+    readonly "$2=$(_read-impl "$1")"
+}
+
+read-extension() {
+    [ -n "${!2}" ] && return
+    readonly "$2=$(_read-impl "$1" | cut -d'.' -f2)"
+}
+
+read-list(){
+    read-single "$1 (space separated)" "$2"
+}
+
+read-multiline() {
+    [ -n "${!2}" ] && return
+    echo "$1 (newline separated. press ctrl-D when done): "
+    list=
+    while read -r  var; do
+        list=$"$list${NL}$(echo "$var" | sed 's/\s\s*/ /g')"
+    done
+    readonly "$2=$list"
+}
+
+read-snippet() {
+    [ -n "${!2}" ] && return
+    echo "$1 (press ctrl-D when done): "
+    readonly "$2=$(cat)"
+}
+
+check-langs() {
+    [ -z "$LANG_NAME" ] && return
+    [ -f "$SCRIPT_DIR/../src/snippets/$LANG_NAME" ] && die 1 "A snippet has already been registered for $LANG_NAME"
+
+    for runner in "$SCRIPT_DIR"/../src/runners/*; do
+        def="$(grep default_for "$runner" | sed 's/.*"\([^"]*\)".*/\1/g')"
+        [ "$LANG_NAME" = "$def" ] && die 1 "Runner '$(basename "$runner")' is already registered as the default for $LANG_NAME" ||:
+    done
+}
+
+check-runner() {
+    [ -z "$RUNNER_NAME" ] && return
+    [ -f "$SCRIPT_DIR/../src/runners/$RUNNER_NAME" ] && die 1 "Runner '$RUNNER_NAME' already exists" ||:
+}
+
+check-extension() {
+    [ -z "$EXTENSION" ] && return
+    [ "$(echo "$EXTENSION" | cut -c1)" = '.' ] && die 1 "Extension should not have the leading dot" ||:
+}
+
+check-aliases() {
+    [ -z "$ALIASES" ] && return
+    [ -z "$LANG_NAME" ] && die 1 "Cannot specify aliases without a language" ||:
+    while read -r line; do
+        al="$(echo "$line" | sed 's/\s*\([^ ]*\).*/\1/')"
+        for i in $ALIASES; do
+            [ "$i" = "$LANG_NAME" ] && die 1 "An alias cannot be the same as the language name" ||:
+            [ "$al" = "$i" ] && die 1 "Alias $al already registered" ||:
+        done
+    done < src/aliases
+}
+
+warn-snippets() {
+    [ -z "$LANG_NAME" ] && [ -n "$SNIPPET" ] && echo "Warning: specifying a snippet with an empty language has no effect" ||:
+}
+
+check-all() {
+    check-runner
+    check-langs
+    check-extension
+    check-aliases
+    warn-snippets
+}
+
+quoted-list() {
+    for i in $1; do
+        printf '"%s", ' "$i"
+    done
+}
+
+quoted-2d-list() {
+    old_ifs="$IFS"
+    IFS=$'\n'
+    for i in $1; do
+        IFS=$old_ifs
+        printf '&[%s], ' "$(quoted-list "$i")"
+    done
+    IFS=$old_ifs
+}
+
+opt-quote-comma(){
+    [ -z "$1" ] && return
+    echo "\"$1\","
+}
+
+make-aliases(){
+    for i in $ALIASES; do
+        echo "$i : $LANG_NAME"
+    done
+}
+
+while [ $# -ne 0 ]; do
+    case $1 in
+        "-h"|"--help") usage 0;;
+        "-v"|"--version") version;;
+
+        "--runner-name")     get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--lang-name")       get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--extension")       get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--exe-deps")        get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--other-deps")      get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--supported-langs") get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--setup")           get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--exe-args-pre")    get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--exe-args-post")   get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--teardown")        get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--snippet")         get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+        "--aliases")         get-var "$1" "$2" "$(var-name "$1")"; shift 2;;
+
+        *) usage 1 "unknown flag '$1'";;
+
+    esac
+done
+
+check-all
+
+read-single    "Language name"                LANG_NAME   && check-langs
+read-single    "Runner name"                  RUNNER_NAME && check-runner
+read-extension "Extension"                    EXTENSION   && check-extension
+read-list "List of aliases for this language" ALIASES     && check-aliases
+
+
+read-list "List of usable executables"                          EXE_DEPS
+read-list "List of other dependencies"                          OTHER_DEPS
+read-list "List of other languages this configuration supports" SUPPORTED_LANGS
+
+read-single "Command line arguments to pass before file name" EXE_ARGS_PRE
+read-single "Command line arguments to pass after file name"  EXE_ARGS_POST
+
+read-multiline "Setup steps"          SETUP
+read-multiline "Teardown steps"       TEARDOWN
+
+read-snippet "Default code snippet" SNIPPET && warn-snippets
+
+echo "Runner {
+    name: \"$RUNNER_NAME\",
+    extension: \"$EXTENSION\",
+    exe_idx: 0,
+    exe_deps: &[$(quoted-list "$EXE_DEPS")],
+    other_deps: &[$(quoted-list "$OTHER_DEPS")],
+    supported_langs: &[$(opt-quote-comma "$LANG_NAME") $(quoted-list "$SUPPORTED_LANGS")],
+    default_for: &[$(opt-quote-comma "$LANG_NAME")],
+    setup: &[$(quoted-2d-list "$SETUP")],
+    exe_args_pre: &[$(quoted-list "$EXE_ARGS_PRE")],
+    exe_args_post: &[$(quoted-list "$EXE_ARGS_POST")],
+    teardown: &[$(quoted-2d-list "$TEARDOWN")],
+}" > "$SCRIPT_DIR/../src/runners/$RUNNER_NAME"
+
+[ -n "$LANG_NAME" ] && echo "$SNIPPET" | awk '!(NR==1&&$0~/^$/){print}' > "$SCRIPT_DIR/../src/snippets/$LANG_NAME"
+
+make-aliases >> "$SCRIPT_DIR/../src/aliases"

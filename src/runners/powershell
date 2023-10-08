@@ -1,0 +1,13 @@
+Runner {
+    name: "powershell",
+    extension: "ps1",
+    exe_idx: 0,
+    exe_deps: &["pwsh"],
+    other_deps: &[],
+    supported_langs: &["powershell"],
+    default_for: &["powershell"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

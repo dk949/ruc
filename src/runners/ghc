@@ -1,0 +1,13 @@
+Runner {
+    name: "ghc",
+    extension: "hs",
+    exe_idx: 0,
+    exe_deps: &["runhaskell", "runghc", ],
+    other_deps: &[],
+    supported_langs: &["haskell", ],
+    default_for: &["haskell",],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

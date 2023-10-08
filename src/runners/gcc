@@ -1,0 +1,13 @@
+Runner {
+    name: "gcc",
+    extension: "c",
+    exe_idx: 0,
+    exe_deps: &[],
+    other_deps: &[&["gcc"]],
+    supported_langs: &["c"],
+    default_for: &["c"],
+    setup: &[&["gcc", "%INPUT_FILE%", "-o", "%OUTPUT_FILE%"]],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[&["rm", "%OUTPUT_FILE%"]],
+}

@@ -1,0 +1,13 @@
+Runner {
+    name: "php",
+    extension: "php",
+    exe_idx: 0,
+    exe_deps: &["php"],
+    other_deps: &[],
+    supported_langs: &["php"],
+    default_for: &["php"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

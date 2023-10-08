@@ -1,0 +1,13 @@
+Runner {
+    name: "perl",
+    extension: "pl",
+    exe_idx: 0,
+    exe_deps: &["perl"],
+    other_deps: &[],
+    supported_langs: &["perl"],
+    default_for: &["perl"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

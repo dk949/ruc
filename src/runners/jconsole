@@ -1,0 +1,15 @@
+Runner {
+    name: "jconsole",
+    extension: "ijs",
+    exe_idx: 0,
+    exe_deps: &["jconsole"],
+    other_deps: &[],
+    supported_langs: &["j"],
+    default_for: &["j"],
+    setup: &[
+        &["sh", "-c", "echo 'exit 0' | cat %INPUT_FILE% - > %OUTPUT_FILE%"],
+        ],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[&["rm", "%OUTPUT_FILE%"]],
+}

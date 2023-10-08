@@ -1,0 +1,13 @@
+Runner {
+    name: "clang",
+    extension: "c",
+    exe_idx: 0,
+    exe_deps: &[],
+    other_deps: &[&["clang"]],
+    supported_langs: &["c"],
+    default_for: &[],
+    setup: &[&["clang", "%INPUT_FILE%", "-o", "%OUTPUT_FILE%"]],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[&["rm", "%OUTPUT_FILE%"]],
+}

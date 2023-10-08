@@ -1,0 +1,13 @@
+Runner {
+    name: "lua",
+    extension: "lua",
+    exe_idx: 0,
+    exe_deps: &["lua"],
+    other_deps: &[],
+    supported_langs: &["lua"],
+    default_for: &["lua"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

@@ -1,0 +1,13 @@
+Runner {
+    name: "ldc",
+    extension: "d",
+    exe_idx: 0,
+    exe_deps: &["ldc2", ],
+    other_deps: &[],
+    supported_langs: &["d", ],
+    default_for: &["d"],
+    setup: &[],
+    exe_args_pre: &["--run", ],
+    exe_args_post: &[],
+    teardown: &[],
+}

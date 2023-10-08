@@ -1,0 +1,13 @@
+Runner {
+    name: "clisp",
+    extension: "lsp",
+    exe_idx: 0,
+    exe_deps: &["clisp"],
+    other_deps: &[],
+    supported_langs: &["lisp"],
+    default_for: &["lisp"],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}

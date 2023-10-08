@@ -1,0 +1,13 @@
+Runner {
+    name: "kotlinscript",
+    extension: "kts",
+    exe_idx: 0,
+    exe_deps: &["kotlinc"],
+    other_deps: &[],
+    supported_langs: &["kotlinscript"],
+    default_for: &["kotlinscript"],
+    setup: &[],
+    exe_args_pre: &["-script"],
+    exe_args_post: &[],
+    teardown: &[],
+}

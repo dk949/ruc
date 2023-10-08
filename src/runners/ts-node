@@ -1,0 +1,13 @@
+Runner {
+    name: "ts-node",
+    extension: "ts",
+    exe_idx: 0,
+    exe_deps: &["ts-node", ],
+    other_deps: &[],
+    supported_langs: &["typescript", ],
+    default_for: &["typescript",],
+    setup: &[],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[],
+}
