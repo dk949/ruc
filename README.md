@@ -166,6 +166,9 @@ suffix is also appended to the substituted string. E.g. if `%OUTPUT_FILE%` is
 substituted for `name_of_output_file`, then `%OUTPUT_FILE%.jar` will become
 `name_of_output_file.jar`.
 
+_Note:_ The last suffix used will be the one passed to the executable, i.e.
+intermediate files can be generated with other suffixes.
+
 It is safe (and advised) to delete the `%OUTPUT_FILE%` in `teardown` if it was
 created in `setup`.
 

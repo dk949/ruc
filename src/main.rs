@@ -388,6 +388,9 @@ mod template {
             }
         }
     }
+    // NOTE: It used to be possible for this function to produce an error.
+    //       Whilst it is no longer possible for it to do so, the signature remains Error<()> so
+    //       that in the future an error could be generated if needed.
     fn get_out_name<'a>(
         line: &'a str,
         subbed: &'a str,
@@ -401,14 +404,7 @@ mod template {
         } else {
             &subbed[start_idx..]
         };
-        if out_name.is_empty() {
-            *out_name = out.to_string();
-        } else if out_name != out {
-            dier!(
-                Codes::InternalError,
-                "Incorrect use of %OUTPUT_FILE% template: template suffix does not match"
-            );
-        }
+        *out_name = out.to_string();
         Ok(())
     }
 
@@ -616,6 +612,8 @@ impl Runner {
         Ok(())
     }
 
+    // TODO(dk949): make it possible to refer to teh main executable and other dependencies through
+    //              template strings.
     fn run(
         self: &Self,
         lang: &str,
