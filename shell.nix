@@ -40,6 +40,7 @@ pkgs.mkShell {
         pkgs.ruby
         pkgs.rustc
         pkgs.scala
+        pkgs.wabt
         pkgs.yasm
         pkgs.zig
         pkgs.zsh

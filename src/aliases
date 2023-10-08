@@ -21,4 +21,5 @@ rb     : ruby
 rs     : rust
 scm    : scheme
 ts     : typescript
+wasm   : webassembly
 zsh    : sh
