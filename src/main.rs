@@ -413,7 +413,12 @@ mod template {
     pub(crate) fn sub<'a>(inp: &'a str, conf: &Conf<'a>, out_name: &mut String) -> Error<String> {
         let mut modified: Option<String> = None;
         for (find, replace) in conf {
-            if let Some(idx) = inp.find(find) {
+            if let Some(idx) = modified
+                .as_ref()
+                .map(|s| s.as_str())
+                .unwrap_or(inp)
+                .find(find)
+            {
                 modified = match modified {
                     Some(modified) => {
                         let new_modified = modified.replace(find, replace.string);
