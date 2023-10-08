@@ -307,24 +307,28 @@ fn check_status_impl(
     if res.status.success() {
         Ok(())
     } else {
-        let mut did_sub_out = false;
+        let mut out_name = String::new();
 
         let exe = exe
             .iter()
             .map(|s| {
                 if let Some(conf) = conf {
-                    template::sub(s, conf, &mut did_sub_out)
+                    template::sub(s, conf, &mut out_name)
                 } else {
-                    s.to_string()
+                    Ok(s.to_string())
                 }
             })
-            .fold(String::new(), |acc, s| {
-                if s.is_empty() {
-                    acc
+            .fold(Ok(String::new()), |acc, s| {
+                if let Ok(s) = s {
+                    if s.is_empty() {
+                        acc
+                    } else {
+                        Ok(acc? + &s + " ")
+                    }
                 } else {
-                    acc + &s + " "
+                    s
                 }
-            });
+            })?;
         if let Some(code) = res.status.code() {
             println!("{exe} exited with '{code}'");
         } else {
@@ -384,23 +388,72 @@ mod template {
             }
         }
     }
+    fn get_out_name<'a>(
+        line: &'a str,
+        subbed: &'a str,
+        start_idx: usize,
+        template_len: usize,
+        sub_len: usize,
+        out_name: &mut String,
+    ) -> Error<()> {
+        let out = if let Some(end_idx) = line[(start_idx + template_len)..].find(' ') {
+            &subbed[start_idx..end_idx + start_idx + sub_len]
+        } else {
+            &subbed[start_idx..]
+        };
+        if out_name.is_empty() {
+            *out_name = out.to_string();
+        } else if out_name != out {
+            dier!(
+                Codes::InternalError,
+                "Incorrect use of %OUTPUT_FILE% template: template suffix does not match"
+            );
+        }
+        Ok(())
+    }
+
     pub(crate) type Conf<'a> = HashMap<&'a str, Rep<'a>>;
     // TODO(dk949): change String to String|&str
-    pub(crate) fn sub<'a>(inp: &'a str, conf: &Conf<'a>, did_sub: &mut bool) -> String {
+    pub(crate) fn sub<'a>(inp: &'a str, conf: &Conf<'a>, out_name: &mut String) -> Error<String> {
         let mut modified: Option<String> = None;
         for (find, replace) in conf {
-            if inp.find(find).is_some() {
+            if let Some(idx) = inp.find(find) {
                 modified = match modified {
-                    Some(modified) => Some(modified.replace(find, replace.string)),
-                    None => Some(inp.replace(find, replace.string)),
+                    Some(modified) => {
+                        let new_modified = modified.replace(find, replace.string);
+                        if replace.is_out {
+                            get_out_name(
+                                &modified,
+                                &new_modified,
+                                idx,
+                                find.len(),
+                                replace.string.len(),
+                                out_name,
+                            )?;
+                        }
+                        Some(new_modified)
+                    }
+                    None => {
+                        let new_modified = inp.replace(find, replace.string);
+                        if replace.is_out {
+                            get_out_name(
+                                inp,
+                                &new_modified,
+                                idx,
+                                find.len(),
+                                replace.string.len(),
+                                out_name,
+                            )?;
+                        }
+                        Some(new_modified)
+                    }
                 };
-                *did_sub = replace.is_out;
             }
         }
         if let Some(modified) = modified {
-            modified
+            Ok(modified)
         } else {
-            inp.to_owned()
+            Ok(inp.to_owned())
         }
     }
 }
@@ -473,29 +526,35 @@ impl Runner {
         Ok(())
     }
 
-    fn run_aux(cmds: &[&[&str]], copmiler_args: &[String], conf: &template::Conf) -> Error<bool> {
+    fn run_aux(
+        cmds: &[&[&str]],
+        copmiler_args: &[String],
+        conf: &template::Conf,
+        out_name: &mut String,
+    ) -> Error<()> {
         if cmds.len() == 0 {
-            return Ok(false);
+            return Ok(());
         }
 
-        fn exec(cmd: &[&str], conf: &template::Conf) -> Error<bool> {
+        fn exec(cmd: &[&str], conf: &template::Conf, out_name: &mut String) -> Error<()> {
             let mut it = cmd.iter();
             let exe = it
                 .next()
                 .ok_or_else(|| dieo!(Codes::InternalError, "Unexpected empty command"))?;
-            let mut did_sub_out = false;
-            let res = Command::new(template::sub(exe, conf, &mut did_sub_out))
-                .args(it.map(|s| template::sub(s, conf, &mut did_sub_out)))
+            let res = Command::new(template::sub(exe, conf, out_name)?)
+                .args(
+                    it.map(|s| template::sub(s, conf, out_name))
+                        .collect::<Error<Vec<_>>>()?,
+                )
                 .output()
                 .to_code(exe)?;
             check_status_template(cmd, &res, Codes::CodeError, conf)?;
-            Ok(did_sub_out)
+            Ok(())
         }
 
-        let mut did_sub_out = false;
         let mut cmds_it = cmds.iter().take(cmds.len() - 1);
         while let Some(cmd) = cmds_it.next() {
-            did_sub_out = did_sub_out || exec(cmd, conf)?;
+            exec(cmd, conf, out_name)?;
         }
         let cmd = cmds.last().ok_or_else(|| {
             dieo!(
@@ -504,17 +563,17 @@ impl Runner {
             )
         })?;
 
-        did_sub_out = did_sub_out
-            || exec(
-                &[
-                    *cmd,
-                    &copmiler_args.iter().map(String::as_str).collect::<Vec<_>>(),
-                ]
-                .concat(),
-                conf,
-            )?;
+        exec(
+            &[
+                *cmd,
+                &copmiler_args.iter().map(String::as_str).collect::<Vec<_>>(),
+            ]
+            .concat(),
+            conf,
+            out_name,
+        )?;
 
-        Ok(did_sub_out)
+        Ok(())
     }
 
     fn run_exe(self: &Self, file: &Path, args: &[String]) -> Error<()> {
@@ -570,10 +629,18 @@ impl Runner {
             ("%INPUT_FILE%", Rep::new(file.to_str_or_die()?)),
             ("%OUTPUT_FILE%", Rep::out(out_file.to_str_or_die()?)),
         ]);
-        let did_sub_out = Self::run_aux(self.setup, compiler_args, &conf)?;
-        self.run_exe(if did_sub_out { &out_file } else { file }, prog_args)
-            .unwrap_or(());
-        Self::run_aux(self.teardown, &[], &conf)?;
+        let mut out_name = String::new();
+        Self::run_aux(self.setup, compiler_args, &conf, &mut out_name)?;
+        self.run_exe(
+            if !out_name.is_empty() {
+                Path::new(&out_name)
+            } else {
+                file
+            },
+            prog_args,
+        )
+        .unwrap_or(());
+        Self::run_aux(self.teardown, &[], &conf, &mut out_name)?;
         Ok(())
     }
 }

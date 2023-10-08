@@ -161,7 +161,10 @@ of the source file and the compiled executable. The template strings
 If `%OUTPUT_FILE%` is referred to, it will be used instead of the `%INPUT_FILE%`
 after `setup`.
 
-These strings will be substituted regardless of any white space or punctuation.
+If the `%OUTPUT_FILE%` string is followed by a non-whitespace suffix, this
+suffix is also appended to the substituted string. E.g. if `%OUTPUT_FILE%` is
+substituted for `name_of_output_file`, then `%OUTPUT_FILE%.jar` will become
+`name_of_output_file.jar`.
 
 It is safe (and advised) to delete the `%OUTPUT_FILE%` in `teardown` if it was
 created in `setup`.
