@@ -2,15 +2,30 @@
 
 Short for run code
 
+## Table of contents
+
+* [How to use?](#how-to-use?)
+  * [History](#history)
+  * [Choosing a runner](#choosing-a-runner)
+* [Why?](#why?)
+* [Development](#development)
+  * [Runner](#runner)
+  * [Templating](#templating)
+  * [Snippets](#snippets)
+  * [Aliases](#aliases)
+* [Language support](#language-support)
+
 ## How to use?
 
-* `make install` to install.
-  * configure install directory in `config.mk`
-  * or by using the `DESTDIR` and `PREFIX` environment variables
+* `cargo install --path .` to install.
+  * By default will install in `$HOME/.local/bin`.
+  * Override prefix with `--root PREFIX`
 * `ruc LANG` will open the system editor with a quick-start code snippet (where
   applicable). Write code in the specified `LANG`. Closing the editor will
   execute the code.
 * `ruc --help` for other options
+* You can also check the [Language support](#language-support) section for
+  a list of supported languages.
 
 ### History
 
@@ -22,55 +37,19 @@ Short for run code
   will not cache current invocation
   * the next `ruc LANG` will use the previous cache file
 
+### Choosing a runner
+
+* Some languages may have multiple runners
+    * E.g. using different compilers or interpreters.
+* You can check which runners are available with `--list-runners` and select a
+  runner with `-r`.
+
 ## Why?
 
 * For quickly testing something without needing to set up a whole dev
   environment.
 * Easier to use then a REPL, but hopefully just as immediate.
 * Some languages don't have REPLs
-
-## Current and future language support
-
-* :ballot_box_with_check: : Done!
-* :hammer: : Still working on it
-* :man_shrugging: : not sure if will work on
-* :no_entry: : Not feasible/applicable
-
-Most languages came from
-[here](https://madnight.github.io/githut/#/pull_requests/2021/3).
-
-| Status                  | Langauge        | Status   | Langauge   | Status          | Language  | Status     | Language          |
-|-------------------------|-----------------|----------|------------|-----------------|-----------|------------|-------------------|
-| :ballot_box_with_check: | Asm (nasm/yasm) | :hammer: | Clojure    | :man_shrugging: | Coq       | :no_entry: | Emacs Lisp        |
-| :ballot_box_with_check: | Bash            | :hammer: | Dart       | :man_shrugging: | DM        | :no_entry: | F#                |
-| :ballot_box_with_check: | C               | :hammer: | Elm        | :man_shrugging: | Elixir    | :no_entry: | Jsonnet           |
-| :ballot_box_with_check: | C#              | :hammer: | Groovy     | :man_shrugging: | Erlang    | :no_entry: | MATLAB            |
-| :ballot_box_with_check: | C++             | :hammer: | Kotlin     | :man_shrugging: | Julia     | :no_entry: | NASL              |
-| :ballot_box_with_check: | Cmake           | :hammer: | PowerShell | :man_shrugging: | Smalltalk | :no_entry: | Nix               |
-| :ballot_box_with_check: | CoffeeScript    | :hammer: | R          | :man_shrugging: | Crystal   | :no_entry: | Objective-C       |
-| :ballot_box_with_check: | D               | :hammer: | Vala       | :man_shrugging: | APL       | :no_entry: | Objective-C++     |
-| :ballot_box_with_check: | Dash            | :hammer: | V          |                 |           | :no_entry: | Puppet            |
-| :ballot_box_with_check: | Fortran         |          |            |                 |           | :no_entry: | Swift             |
-| :ballot_box_with_check: | Go              |          |            |                 |           | :no_entry: | SystemVerilog     |
-| :ballot_box_with_check: | Haskell         |          |            |                 |           | :no_entry: | Visual Basic .NET |
-| :ballot_box_with_check: | Java            |          |            |                 |           | :no_entry: | TSQL              |
-| :ballot_box_with_check: | JavaScript      |          |            |                 |           | :no_entry: | Vim script        |
-| :ballot_box_with_check: | Lua             |          |            |                 |           | :no_entry: |                   |
-| :ballot_box_with_check: | Ocaml           |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Perl            |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | PHP             |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | PureScript      |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Python          |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Ruby            |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Rust            |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Shell           |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Scala           |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Scheme          |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | TypeScript      |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | WebAssembly     |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Zig             |          |            |                 |           |            |                   |
-| :ballot_box_with_check: | Zsh             |          |            |                 |           |            |                   |
-
 
 ## Development
 
@@ -189,3 +168,90 @@ A snippet may be empty.
 The `src/aliases` file contains a list of aliases for languages in the format
 `alias : language`. These aliases can be used in pace of the language name. E.g.
 adding `js : javascript` makes `ruc js` equivalent to `ruc javascript`.
+
+## Language support
+
+* :ballot_box_with_check: : Done!
+* :hammer: : Still working on it
+* :man_shrugging: : Possibly planned for the future
+
+Most languages came from
+[here](https://madnight.github.io/githut/#/pull_requests/2023/2).
+
+| Language                 | Status                  |
+| ------------------------ | ----------------------- |
+| Ada                      | :hammer:                |
+| Agda                     | :man_shrugging:         |
+| Assembly (GAS)           | :ballot_box_with_check: |
+| Assembly (fasm)          | :hammer:                |
+| Assembly (nasm/yasm)     | :ballot_box_with_check: |
+| Awk                      | :ballot_box_with_check: |
+| Batchfile                | :man_shrugging:         |
+| Boo                      | :man_shrugging:         |
+| C                        | :ballot_box_with_check: |
+| C#                       | :ballot_box_with_check: |
+| C++                      | :ballot_box_with_check: |
+| CMake                    | :ballot_box_with_check: |
+| COBOL                    | :man_shrugging:         |
+| Clojure                  | :ballot_box_with_check: |
+| CoffeeScript             | :ballot_box_with_check: |
+| Common Lisp              | :ballot_box_with_check: |
+| Coq                      | :man_shrugging:         |
+| Crystal                  | :man_shrugging:         |
+| Cuda                     | :man_shrugging:         |
+| Cython                   | :hammer:                |
+| D                        | :ballot_box_with_check: |
+| Dart                     | :hammer:                |
+| Eiffel                   | :man_shrugging:         |
+| Elixir                   | :hammer:                |
+| Elm                      | :man_shrugging:         |
+| Erlang                   | :man_shrugging:         |
+| F#                       | :man_shrugging:         |
+| F*                       | :man_shrugging:         |
+| Fortran                  | :ballot_box_with_check: |
+| Go                       | :ballot_box_with_check: |
+| Groovy                   | :ballot_box_with_check: |
+| Hack                     | :man_shrugging:         |
+| Haskell                  | :ballot_box_with_check: |
+| Haxe                     | :man_shrugging:         |
+| Idris                    | :man_shrugging:         |
+| J                        | :ballot_box_with_check: |
+| Java                     | :ballot_box_with_check: |
+| JavaScript               | :ballot_box_with_check: |
+| Julia                    | :ballot_box_with_check: |
+| Kotlin                   | :ballot_box_with_check: |
+| Kotlinscript             | :ballot_box_with_check: |
+| LLVM                     | :hammer:                |
+| Lua                      | :ballot_box_with_check: |
+| MLIR                     | :hammer:                |
+| Makefile                 | :man_shrugging:         |
+| NewLisp                  | :man_shrugging:         |
+| Nim                      | :hammer:                |
+| Nix                      | :hammer:                |
+| OCaml                    | :ballot_box_with_check: |
+| Objective-C              | :man_shrugging:         |
+| PHP                      | :ballot_box_with_check: |
+| Perl                     | :ballot_box_with_check: |
+| PowerShell               | :ballot_box_with_check: |
+| Prolog                   | :man_shrugging:         |
+| PureScript               | :man_shrugging:         |
+| Python                   | :ballot_box_with_check: |
+| R                        | :ballot_box_with_check: |
+| Racket                   | :man_shrugging:         |
+| Reason                   | :man_shrugging:         |
+| Ruby                     | :ballot_box_with_check: |
+| Rust                     | :ballot_box_with_check: |
+| Scala2                   | :ballot_box_with_check: |
+| Scala3                   | :ballot_box_with_check: |
+| Scheme                   | :ballot_box_with_check: |
+| Shell                    | :ballot_box_with_check: |
+| Smalltalk                | :man_shrugging:         |
+| Swift                    | :hammer:                |
+| Tcl                      | :man_shrugging:         |
+| TypeScript               | :ballot_box_with_check: |
+| Vala                     | :man_shrugging:         |
+| Visual Basic             | :hammer:                |
+| Vue                      | :man_shrugging:         |
+| WebAssembly              | :ballot_box_with_check: |
+| Zig                      | :ballot_box_with_check: |
+
