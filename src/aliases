@@ -9,6 +9,8 @@ f90    : fortran
 hs     : haskell
 jl     : julia
 js     : javascript
+kt     : kotlin
+kts    : kotlinscript
 ml     : ocaml
 node   : javascript
 pl     : perl
