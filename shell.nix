@@ -33,6 +33,7 @@ pkgs.mkShell {
         pkgs.powershell
         pkgs.python3
         pkgs.ruby
+        pkgs.rustc
         pkgs.scala
         pkgs.zig
         pkgs.zsh

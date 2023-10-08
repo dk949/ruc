@@ -1,0 +1,13 @@
+Runner {
+    name: "rustc",
+    extension: "c",
+    exe_idx: 0,
+    exe_deps: &[],
+    other_deps: &[&["rustc"]],
+    supported_langs: &["c"],
+    default_for: &["rust"],
+    setup: &[&["rustc", "%INPUT_FILE%", "-o", "%OUTPUT_FILE%"]],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[&["rm", "%OUTPUT_FILE%"]],
+}
