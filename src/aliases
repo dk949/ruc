@@ -1,4 +1,5 @@
 R      : r
+as     : gas
 bash   : sh
 clj    : clojure
 coffee : coffeescript

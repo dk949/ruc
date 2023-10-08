@@ -7,6 +7,7 @@ pkgs.mkShell {
 
         pkgs.R
         pkgs.bash
+        pkgs.bintools
         pkgs.clang
         pkgs.clisp
         pkgs.clojure
