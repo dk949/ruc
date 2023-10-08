@@ -23,6 +23,7 @@ pkgs.mkShell {
         pkgs.guile
         pkgs.jre_minimal
         pkgs.julia
+        pkgs.kotlin
         pkgs.ldc
         pkgs.lua
         pkgs.nodePackages.ts-node
