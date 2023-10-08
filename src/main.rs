@@ -286,10 +286,45 @@ fn output_printer(v: &Vec<u8>, indent: usize) {
 }
 
 fn check_status(exe: &[&str], res: &process::Output, code: Codes) -> Error<()> {
+    check_status_impl(exe, res, code, None)
+}
+
+fn check_status_template(
+    exe: &[&str],
+    res: &process::Output,
+    code: Codes,
+    conf: &template::Conf,
+) -> Error<()> {
+    check_status_impl(exe, res, code, Some(conf))
+}
+
+fn check_status_impl(
+    exe: &[&str],
+    res: &process::Output,
+    code: Codes,
+    conf: Option<&template::Conf>,
+) -> Error<()> {
     if res.status.success() {
         Ok(())
     } else {
-        let exe = exe.join(" ");
+        let mut did_sub_out = false;
+
+        let exe = exe
+            .iter()
+            .map(|s| {
+                if let Some(conf) = conf {
+                    template::sub(s, conf, &mut did_sub_out)
+                } else {
+                    s.to_string()
+                }
+            })
+            .fold(String::new(), |acc, s| {
+                if s.is_empty() {
+                    acc
+                } else {
+                    acc + &s + " "
+                }
+            });
         if let Some(code) = res.status.code() {
             println!("{exe} exited with '{code}'");
         } else {
@@ -328,6 +363,48 @@ fn find_exe<'a>(dep: &'a str) -> Option<&'a str> {
     }
 }
 
+mod template {
+    use super::*;
+
+    pub(crate) struct Rep<'a> {
+        pub string: &'a str,
+        pub is_out: bool,
+    }
+    impl<'a> Rep<'a> {
+        pub(crate) fn new(s: &'a str) -> Self {
+            Rep {
+                string: s,
+                is_out: false,
+            }
+        }
+        pub(crate) fn out(s: &'a str) -> Self {
+            Rep {
+                string: s,
+                is_out: true,
+            }
+        }
+    }
+    pub(crate) type Conf<'a> = HashMap<&'a str, Rep<'a>>;
+    // TODO(dk949): change String to String|&str
+    pub(crate) fn sub<'a>(inp: &'a str, conf: &Conf<'a>, did_sub: &mut bool) -> String {
+        let mut modified: Option<String> = None;
+        for (find, replace) in conf {
+            if inp.find(find).is_some() {
+                modified = match modified {
+                    Some(modified) => Some(modified.replace(find, replace.string)),
+                    None => Some(inp.replace(find, replace.string)),
+                };
+                *did_sub = replace.is_out;
+            }
+        }
+        if let Some(modified) = modified {
+            modified
+        } else {
+            inp.to_owned()
+        }
+    }
+}
+
 #[derive(Clone)]
 struct Runner {
     name: &'static str,
@@ -343,9 +420,38 @@ struct Runner {
     teardown: &'static [&'static [&'static str]],
 }
 
+enum Exe {
+    Str(&'static str),
+    Native,
+}
+
+impl Exe {
+    fn as_str(self: &Self) -> &'static str {
+        match self {
+            Exe::Str(s) => s,
+            Exe::Native => "",
+        }
+    }
+}
+
 impl Runner {
-    fn get_exe(self: &Self) -> &'static str {
-        self.exe_deps[self.exe_idx]
+    const NATIVE: usize = std::usize::MAX;
+    fn get_exe(self: &Self) -> Error<Exe> {
+        if self.exe_idx == Self::NATIVE {
+            if !self.exe_args_pre.is_empty() {
+                dier!(
+                    Codes::InternalError,
+                    "Expected no 'pre' args for a native executable"
+                )
+            }
+            Ok(Exe::Native)
+        } else {
+            Ok(Exe::Str(
+                self.exe_deps
+                    .get(self.exe_idx)
+                    .ok_or_else(|| dieo!(Codes::InternalError, ""))?,
+            ))
+        }
     }
     fn check_dep_list<'a>(list: &'a [&'a str]) -> Option<usize> {
         let mut idx = 0;
@@ -356,31 +462,40 @@ impl Runner {
         dep.map(|_| idx - 1)
     }
     fn check_deps(self: &mut Self) -> Result<(), &'static [&'static str]> {
-        self.exe_idx = Self::check_dep_list(self.exe_deps).ok_or(self.exe_deps)?;
+        self.exe_idx = if self.exe_deps.is_empty() {
+            Self::NATIVE
+        } else {
+            Self::check_dep_list(self.exe_deps).ok_or(self.exe_deps)?
+        };
         for deps in self.other_deps {
             Self::check_dep_list(*deps).ok_or(*deps)?;
         }
         Ok(())
     }
 
-    fn run_aux(cmds: &[&[&str]], copmiler_args: &[String]) -> Error<()> {
+    fn run_aux(cmds: &[&[&str]], copmiler_args: &[String], conf: &template::Conf) -> Error<bool> {
         if cmds.len() == 0 {
-            return Ok(());
+            return Ok(false);
         }
 
-        fn exec(cmd: &[&str]) -> Error<()> {
+        fn exec(cmd: &[&str], conf: &template::Conf) -> Error<bool> {
             let mut it = cmd.iter();
             let exe = it
                 .next()
                 .ok_or_else(|| dieo!(Codes::InternalError, "Unexpected empty command"))?;
-            let res = Command::new(exe).args(it).output().to_code(exe)?;
-            check_status(cmd, &res, Codes::CodeError)?;
-            Ok(())
+            let mut did_sub_out = false;
+            let res = Command::new(template::sub(exe, conf, &mut did_sub_out))
+                .args(it.map(|s| template::sub(s, conf, &mut did_sub_out)))
+                .output()
+                .to_code(exe)?;
+            check_status_template(cmd, &res, Codes::CodeError, conf)?;
+            Ok(did_sub_out)
         }
 
+        let mut did_sub_out = false;
         let mut cmds_it = cmds.iter().take(cmds.len() - 1);
         while let Some(cmd) = cmds_it.next() {
-            exec(cmd)?;
+            did_sub_out = did_sub_out || exec(cmd, conf)?;
         }
         let cmd = cmds.last().ok_or_else(|| {
             dieo!(
@@ -389,28 +504,50 @@ impl Runner {
             )
         })?;
 
-        #[cfg_attr(rustfmt, rustfmt_skip)]
-        exec(&[*cmd, &copmiler_args.iter().map(String::as_str).collect::<Vec<_>>()].concat())?;
+        did_sub_out = did_sub_out
+            || exec(
+                &[
+                    *cmd,
+                    &copmiler_args.iter().map(String::as_str).collect::<Vec<_>>(),
+                ]
+                .concat(),
+                conf,
+            )?;
 
-        Ok(())
+        Ok(did_sub_out)
     }
 
     fn run_exe(self: &Self, file: &Path, args: &[String]) -> Error<()> {
-        let res = Command::new(self.get_exe())
-            .args(self.exe_args_pre.iter())
-            .arg(file)
-            .args(self.exe_args_post.iter())
-            .args(args)
-            .stdin(Stdio::inherit())
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .output()
-            .to_code(self.get_exe())?;
+        let exe = self.get_exe()?;
+        let is_native = matches!(exe, Exe::Native);
+        let mut cmd = Command::new(if is_native {
+            file.to_str_or_die()?
+        } else {
+            exe.as_str()
+        });
+        let res = if is_native {
+            cmd.args(self.exe_args_post)
+        } else {
+            cmd.args(self.exe_args_pre.iter())
+                .arg(file)
+                .args(self.exe_args_post.iter())
+        }
+        .args(args)
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .output()
+        .to_code(if is_native {
+            file.to_str_or_die()?
+        } else {
+            exe.as_str()
+        })?;
+
         check_status(
             &[
-                &[self.get_exe()],
+                &[exe.as_str()],
                 self.exe_args_pre,
-                &[&file.as_os_str().to_string_lossy()],
+                &[&file.to_str_or_die()?],
                 self.exe_args_post,
             ]
             .concat(),
@@ -420,10 +557,23 @@ impl Runner {
         Ok(())
     }
 
-    fn run(self: &Self, file: &Path, compiler_args: &[String], prog_args: &[String]) -> Error<()> {
-        Self::run_aux(self.setup, compiler_args)?;
-        self.run_exe(file, prog_args).unwrap_or(());
-        Self::run_aux(self.teardown, &[])?;
+    fn run(
+        self: &Self,
+        lang: &str,
+        file: &Path,
+        compiler_args: &[String],
+        prog_args: &[String],
+    ) -> Error<()> {
+        use template::*;
+        let out_file = cache_file_name(&env::temp_dir(), lang, "output_file", "");
+        let conf = Conf::from([
+            ("%INPUT_FILE%", Rep::new(file.to_str_or_die()?)),
+            ("%OUTPUT_FILE%", Rep::out(out_file.to_str_or_die()?)),
+        ]);
+        let did_sub_out = Self::run_aux(self.setup, compiler_args, &conf)?;
+        self.run_exe(if did_sub_out { &out_file } else { file }, prog_args)
+            .unwrap_or(());
+        Self::run_aux(self.teardown, &[], &conf)?;
         Ok(())
     }
 }
@@ -482,8 +632,10 @@ impl Runners {
 
     fn missing<'a>(deps: &'a [&'a str]) -> Error<()> {
         if deps.is_empty() {
-            println!("Empty dependency list has a missing dependency");
-            return Err(Codes::InternalError);
+            dier!(
+                Codes::InternalError,
+                "Empty dependency list has a missing dependency"
+            );
         }
         print!("Could not execute due to missing dependencies: ");
         let mut it = deps.iter();
@@ -550,6 +702,17 @@ impl ToErrorCode<process::Output> for io::Result<process::Output> {
 impl ToErrorCode<()> for io::Result<()> {
     fn to_code(self: Self, _: &str) -> Error<()> {
         self.or_else(|e| dier!(Codes::FileError, "Could not create a temporary file: {e}"))
+    }
+}
+
+trait ToStrOrDie {
+    fn to_str_or_die(self: &Self) -> Error<&str>;
+}
+
+impl ToStrOrDie for Path {
+    fn to_str_or_die(self: &Self) -> Error<&str> {
+        self.to_str()
+            .ok_or_else(|| dieo!(Codes::InternalError, "Could not convert path to str"))
     }
 }
 
@@ -685,7 +848,7 @@ fn program(args: Args) -> Error<()> {
     let editor = editor(&args.editor)?;
 
     run_editor(&editor, &hist_path.as_os_str().to_string_lossy())?;
-    runner.run(&hist_path, &args.compiler_args, &args.prog_args)?;
+    runner.run(&lang, &hist_path, &args.compiler_args, &args.prog_args)?;
     Ok(())
 }
 
