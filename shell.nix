@@ -17,6 +17,7 @@ pkgs.mkShell {
         pkgs.dotty
         pkgs.gawk
         pkgs.gcc
+        pkgs.gfortran
         pkgs.ghc
         pkgs.go
         pkgs.groovy
