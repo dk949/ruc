@@ -22,11 +22,13 @@ pkgs.mkShell {
         pkgs.go
         pkgs.groovy
         pkgs.guile
+        pkgs.j
         pkgs.jre_minimal
         pkgs.julia
         pkgs.kotlin
         pkgs.ldc
         pkgs.lua
+        pkgs.nasm
         pkgs.nodePackages.ts-node
         pkgs.nodejs
         pkgs.ocaml
@@ -37,6 +39,7 @@ pkgs.mkShell {
         pkgs.ruby
         pkgs.rustc
         pkgs.scala
+        pkgs.yasm
         pkgs.zig
         pkgs.zsh
 

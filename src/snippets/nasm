@@ -1,0 +1,19 @@
+global  _start
+
+%define     SYS_read        0
+%define   	SYS_write       1
+%define   	SYS_open        2
+%define   	SYS_close       3
+%define   	SYS_nanosleep   35
+%define   	SYS_exit        60
+%define   	SYS_wait4       61
+
+section .text
+_start:
+
+            mov         rax, SYS_exit
+            mov         rdi, 0x0
+            syscall
+
+section .data
+section .bss

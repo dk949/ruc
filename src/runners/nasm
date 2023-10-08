@@ -1,0 +1,19 @@
+Runner {
+    name: "nasm",
+    extension: "asm",
+    exe_idx: 0,
+    exe_deps: &[],
+    other_deps: &[&["nasm"], &["ld"]],
+    supported_langs: &["nasm"],
+    default_for: &["nasm"],
+    setup: &[
+        &["nasm", "-felf64", "%INPUT_FILE%", "-o", "%OUTPUT_FILE%.o"],
+        &["ld", "%OUTPUT_FILE%.o", "-o", "%OUTPUT_FILE%"],
+    ],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[
+        &["rm", "%OUTPUT_FILE%.o"],
+        &["rm", "%OUTPUT_FILE%"],
+    ],
+}

@@ -1,0 +1,19 @@
+Runner {
+    name: "yasm",
+    extension: "asm",
+    exe_idx: 0,
+    exe_deps: &[],
+    other_deps: &[&["yasm"], &["ld"]],
+    supported_langs: &["nasm"],
+    default_for: &[],
+    setup: &[
+        &["yasm", "-felf64", "%INPUT_FILE%", "-o", "%OUTPUT_FILE%.o"],
+        &["ld", "%OUTPUT_FILE%.o", "-o", "%OUTPUT_FILE%"],
+    ],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[
+        &["rm", "%OUTPUT_FILE%.o"],
+        &["rm", "%OUTPUT_FILE%"],
+    ],
+}
