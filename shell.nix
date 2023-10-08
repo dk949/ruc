@@ -7,6 +7,7 @@ pkgs.mkShell {
 
         pkgs.R
         pkgs.bash
+        pkgs.clang
         pkgs.clisp
         pkgs.clojure
         pkgs.cmakeMinimal
@@ -15,6 +16,7 @@ pkgs.mkShell {
         pkgs.dmd
         pkgs.dotty
         pkgs.gawk
+        pkgs.gcc
         pkgs.ghc
         pkgs.go
         pkgs.groovy
