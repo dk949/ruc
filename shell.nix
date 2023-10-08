@@ -29,6 +29,7 @@ pkgs.mkShell {
         pkgs.kotlin
         pkgs.ldc
         pkgs.lua
+        pkgs.mono
         pkgs.nasm
         pkgs.nodePackages.ts-node
         pkgs.nodejs

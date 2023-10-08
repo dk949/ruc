@@ -1,0 +1,13 @@
+Runner {
+    name: "mono",
+    extension: "cs",
+    exe_idx: 0,
+    exe_deps: &["mono"],
+    other_deps: &[&["csc"]],
+    supported_langs: &["c#"],
+    default_for: &["c#"],
+    setup: &[&["csc", "%INPUT_FILE%", "-out:%OUTPUT_FILE%" ]],
+    exe_args_pre: &[],
+    exe_args_post: &[],
+    teardown: &[&["rm", "%OUTPUT_FILE%"]],
+}
