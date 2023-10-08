@@ -89,7 +89,6 @@ git config --local core.hooksPath .githooks/
 The simplest way to add a language is by running the `scripts/add` script or by
 adding/modifying file in `src/runners/` and `src/snippets/`.
 
-
 ### Runner
 
 A runner is a rust struct with the following structure (see notes below for
@@ -177,3 +176,10 @@ file is a file who's name is the same as the language, containing any
 boilerplate code which may be required for a program in this language.
 
 A snippet may be empty.
+
+
+### Aliases
+
+The `src/aliases` file contains a list of aliases for languages in the format
+`alias : language`. These aliases can be used in pace of the language name. E.g.
+adding `js : javascript` makes `ruc js` equivalent to `ruc javascript`.
