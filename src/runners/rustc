@@ -1,10 +1,10 @@
 Runner {
     name: "rustc",
-    extension: "c",
+    extension: "rs",
     exe_idx: 0,
     exe_deps: &[],
     other_deps: &[&["rustc"]],
-    supported_langs: &["c"],
+    supported_langs: &["rust"],
     default_for: &["rust"],
     setup: &[&["rustc", "%INPUT_FILE%", "-o", "%OUTPUT_FILE%"]],
     exe_args_pre: &[],
