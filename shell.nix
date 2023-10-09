@@ -24,7 +24,7 @@ pkgs.mkShell {
         pkgs.groovy
         pkgs.guile
         pkgs.j
-        pkgs.jre_minimal
+        pkgs.jdk
         pkgs.julia
         pkgs.kotlin
         pkgs.ldc
