@@ -80,6 +80,7 @@ struct Args {
     hist: Hist,
     list: List,
     editor: String,
+    cache_dir: PathBuf,
     compiler_args: Vec<String>,
     prog_args: Vec<String>,
     runner: Option<String>,
@@ -108,6 +109,11 @@ fn parse_args() -> Args {
             -t, --temp              ignore history and use default snippet
             -n, --new-history       reset current language history to default
             -u, --use-histoty       use the history file (default)
+
+                --cache-dir DIR     which directory to use for caches. by
+                                    default $XDG_CACHE_HOME or $HOME/.cache.
+                                    the directory will be created if it does not
+                                    exist
 
             -l, --ls                list available languages
             -a, --aliases           list available aliases
@@ -153,6 +159,8 @@ fn parse_args() -> Args {
     let mut prog_args = Vec::new();
     let mut runner = None;
     let mut lang = String::new();
+    let mut cache_dir = dirs::cache_dir()
+        .unwrap_or_else(|| die!(Codes::InternalError, "Could not locate cache directory"));
 
     let mut args = env::args();
     args.next();
@@ -200,6 +208,17 @@ fn parse_args() -> Args {
                     die!(Codes::ArgumentError, "Expected editor name after '{flag}'")
                 });
             }
+            "--cache-dir" => {
+                cache_dir = args
+                    .next()
+                    .unwrap_or_else(|| {
+                        die!(
+                            Codes::ArgumentError,
+                            "Expected directory path after --cache-dir"
+                        )
+                    })
+                    .into();
+            }
             _ => {
                 if lang.is_empty() {
                     if arg.starts_with('-') {
@@ -219,6 +238,7 @@ fn parse_args() -> Args {
     return Args {
         hist,
         list,
+        cache_dir,
         editor,
         compiler_args,
         prog_args,
@@ -802,9 +822,7 @@ fn cache_file_name(dir: &PathBuf, lang: &str, runner: &str, extension: &str) -> 
     return file;
 }
 
-fn cache_file_path(lang: &str, runner: &str, extension: &str) -> Error<PathBuf> {
-    let cache = dirs::cache_dir()
-        .ok_or_else(|| dieo!(Codes::InternalError, "Could not locate cache directory"))?;
+fn cache_file_path(cache: &PathBuf, lang: &str, runner: &str, extension: &str) -> Error<PathBuf> {
     let cache_dir = cache.join(CACHE_DIR);
     fs::create_dir_all(&cache_dir).or_else(|e| {
         dier!(
@@ -818,6 +836,7 @@ fn cache_file_path(lang: &str, runner: &str, extension: &str) -> Error<PathBuf> 
 
 fn setup_hist<'a>(
     hist: Hist,
+    cache_dir: &PathBuf,
     lang: &'a str,
     runner: &str,
     extension: &str,
@@ -830,7 +849,7 @@ fn setup_hist<'a>(
             (file, path)
         }
         Hist::Use | Hist::New => {
-            let cache_path = cache_file_path(lang, runner, extension)?;
+            let cache_path = cache_file_path(cache_dir, lang, runner, extension)?;
             if hist == Hist::Use && cache_path.exists() {
                 return if cache_path.is_file() {
                     Ok(cache_path)
@@ -910,7 +929,14 @@ fn program(args: Args) -> Error<()> {
 
     let runner = runners.determine(args.runner.as_ref(), lang)?;
     let snippet = get_snippet(&snippets, lang)?;
-    let hist_path = setup_hist(args.hist, lang, runner.name, runner.extension, snippet)?;
+    let hist_path = setup_hist(
+        args.hist,
+        &args.cache_dir,
+        lang,
+        runner.name,
+        runner.extension,
+        snippet,
+    )?;
     let editor = editor(&args.editor)?;
 
     run_editor(&editor, &hist_path.as_os_str().to_string_lossy())?;
