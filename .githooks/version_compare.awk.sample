@@ -31,6 +31,8 @@ BEGIN {
     }
 
     if (length(cargo) > length(git)) {
+        if (ver_cmp(cargo, git) == 0)
+            exit(0) # cargo and git version numbers match but cargo has a commit
         print "git tag was updated before updating cargo version"
         print_ver_and_exit(git, cargo)
     } else if (length(cargo) < length(git) || length(git) == 3) {
