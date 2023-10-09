@@ -93,59 +93,56 @@ fn parse_args() -> Args {
             Codes::Ok,
             r#"usage: {} LANG [OPTIONS]
 
-            Open the EDITOR. Write some code. Have it executed.
+    Open the EDITOR. Write some code. Have it executed.
 
-            positional arguments:
-            LANG                    language to be ran
+    positional arguments:
+    LANG                    language to be ran
 
-            options:
+    options:
 
-            -r, --runner            select which runner to use
+    -r, --runner RUNNER     select which runner to use
 
-            -e, --editor            specify name of the editor to use.
-                                    by default uses the EDITOR environment
-                                    variable
+    -e, --editor EDITOR     specify name of the editor to use. by default uses
+                            the EDITOR environment variable
 
-            -t, --temp              ignore history and use default snippet
-            -n, --new-history       reset current language history to default
-            -u, --use-histoty       use the history file (default)
+    -t, --temp              ignore history and use default snippet
+    -n, --new-history       reset current language history to default
+    -u, --use-histoty       use the history file (default)
 
-                --cache-dir DIR     which directory to use for caches. by
-                                    default $XDG_CACHE_HOME or $HOME/.cache.
-                                    the directory will be created if it does not
-                                    exist
+        --cache-dir DIR     which directory to use for caches. by default
+                            $XDG_CACHE_HOME or $HOME/.cache. the directory will
+                            be created if it does not exist
 
-            -l, --ls                list available languages
-            -a, --aliases           list available aliases
-                --list-runners      list available runners. if a language is
-                                    specified, only runners for that language are
-                                    listed
+    -l, --ls                list available languages
+    -a, --aliases           list available aliases
+        --list-runners      list available runners. if a language is specified,
+                            only runners for that language are listed
 
-            --args ARGS             space separated list of arguments to be passed
-                                    to the compiler or the interpreter.
-            --argv ARGS             space separated list of arguments to be
-                                    passed to the executed program
+    --args ARGS             space separated list of arguments to be passed to
+                            the compiler or the interpreter.
+    --argv ARGS             space separated list of arguments to be passed to
+                            the executed program
 
-            -h, --help              show this help message and exit
-            -v, --version           print program version
+    -h, --help              show this help message and exit
+    -v, --version           print program version
 
 
-            Notes:
-                Between -t, -n and -u, the last option specified will be used
+    Notes:
+        Between -t, -n and -u, the last option specified will be used
 
-                Between -l, -a and --list-runners, the last option specified will be used
+        Between -l, -a and --list-runners, the last option specified will be used
 
-            Exit codes:
-                -1: Internal error
-                 0: OK
-                 1: Argument error
-                 2: Language error
-                 3: Runner error
-                 4: Dependency error
-                 5: Editor error
-                 6: File error
-                 7: Code error
-            "#,
+    Exit codes:
+        -1: Internal error
+         0: OK
+         1: Argument error
+         2: Language error
+         3: Runner error
+         4: Dependency error
+         5: Editor error
+         6: File error
+         7: Code error
+    "#,
             Path::new(&env::args().next().unwrap())
                 .file_name()
                 .unwrap()
