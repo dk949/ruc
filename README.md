@@ -252,6 +252,6 @@ Most languages came from
 | Vala                     | :man_shrugging:         |
 | Visual Basic             | :hammer:                |
 | Vue                      | :man_shrugging:         |
-| WebAssembly              | :ballot_box_with_check: |
+| WebAssembly              | :hammer:                |
 | Zig                      | :ballot_box_with_check: |
 
