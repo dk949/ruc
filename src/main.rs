@@ -816,8 +816,6 @@ fn cache_file_path(lang: &str, runner: &str, extension: &str) -> Error<PathBuf> 
     Ok(cache_file_name(&cache_dir, lang, runner, extension))
 }
 
-static mut TEMP_FILE: Option<PathBuf> = None;
-
 fn setup_hist<'a>(
     hist: Hist,
     lang: &'a str,
@@ -829,10 +827,6 @@ fn setup_hist<'a>(
         Hist::Temp => {
             let path = cache_file_name(&env::temp_dir(), lang, runner, extension);
             let file = fs::File::create(&path).to_code(&path.to_string_lossy())?;
-            // This is fine
-            unsafe {
-                TEMP_FILE = Some(path.clone());
-            }
             (file, path)
         }
         Hist::Use | Hist::New => {
@@ -859,15 +853,17 @@ fn setup_hist<'a>(
     return Ok(path);
 }
 
-fn cleanup_temp() {
-    if let Some(temp) = unsafe { &TEMP_FILE } {
-        fs::remove_file(temp).unwrap_or_else(|e| {
-            println!(
-                "Warning: could not remove temporary file {}: {e}",
-                temp.to_string_lossy()
+fn cleanup_temp(hist: &Hist, hist_path: &PathBuf) -> Error<()> {
+    if matches!(hist, Hist::Temp) {
+        fs::remove_file(hist_path).or_else(|e| {
+            dier!(
+                Codes::FileError,
+                "Could not remove temporary file {}: {e}",
+                hist_path.to_string_lossy()
             )
-        });
+        })?;
     }
+    Ok(())
 }
 
 fn editor(user_editor: &String) -> Error<String> {
@@ -918,12 +914,11 @@ fn program(args: Args) -> Error<()> {
     let editor = editor(&args.editor)?;
 
     run_editor(&editor, &hist_path.as_os_str().to_string_lossy())?;
-    runner.run(&lang, &hist_path, &args.compiler_args, &args.prog_args)?;
-    Ok(())
+    let run_res = runner.run(&lang, &hist_path, &args.compiler_args, &args.prog_args);
+    cleanup_temp(&args.hist, &hist_path)?;
+    run_res
 }
 
 fn main() {
-    let exit_code = program(parse_args()).map_or_else(identity, |_| Codes::Ok);
-    cleanup_temp();
-    exit(exit_code)
+    exit(program(parse_args()).map_or_else(identity, |_| Codes::Ok))
 }
