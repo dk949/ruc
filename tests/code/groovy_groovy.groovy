@@ -1,0 +1,1 @@
+println("ruc test passed");

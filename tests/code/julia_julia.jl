@@ -1,0 +1,1 @@
+print("ruc test passed")

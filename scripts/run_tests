@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+set -e
+script_dir="$(dirname "$0")"
+test_dir="$(realpath "$script_dir/../tests/code")"
+expected_dir="$(realpath "$script_dir/../tests/expected")"
+exe="$(realpath "$script_dir/../target/debug/ruc")"
+cache_dir="$(realpath "$script_dir/../tests/cache")"
+snippet_dir="$(realpath "$script_dir/../src/snippets/")"
+runner_dir="$(realpath "$script_dir/../src/runners/")"
+
+if [ -t 1 ]; then
+    green="\x1b[32m"
+    red="\x1b[31m"
+    reset="\x1b[0m"
+else
+    red=
+    green=
+    reset=
+fi
+
+
+rm -rf "$cache_dir"
+mkdir -p "$cache_dir"
+bad_exit(){
+    printf "Runner: %s; Language: %s; ${red}failed${reset}\n"  "$1" "$2"
+    echo Exit code: "$3"
+    echo "Output:"
+    echo "$4"
+    exit "$3"
+}
+
+bad_output() {
+    printf "Runner: %s; Language: %s; ${red}failed${reset}\n"  "$1" "$2"
+    echo "Expected output:"
+    echo "$3"
+    echo "Actual output:"
+    echo "$4"
+    exit 255
+}
+
+check_tests() {
+    declare -A snip_map
+    declare -A runner_map
+    for snip in "$snippet_dir"/*; do
+        snip="$(basename "$snip")"
+        snip_map[$snip]=0
+        if ls "$test_dir/$snip"_* >/dev/null 2>&1; then
+            snip_map[$snip]=1
+        fi
+    done
+    for runner in "$runner_dir"/*; do
+        runner="$(basename "$runner")"
+        runner_map[$runner]=0
+        if ls "$test_dir"/*_"$runner"* >/dev/null 2>&1; then
+            runner_map[$runner]=1
+        fi
+    done
+    for snip in "${!snip_map[@]}"; do
+        if [ ${snip_map[$snip]} -ne 1 ]; then
+            echo "Warning: no test for the langauge '$snip'"
+        fi
+    done
+    for runner in "${!runner_map[@]}"; do
+        if [ ${runner_map[$runner]} -ne 1 ]; then
+            echo "Warning: no test for the runner '$runner'"
+        fi
+    done
+}
+
+check_tests
+
+for file in "$test_dir"/*; do
+    file_base="$(basename "$file")"
+    lang="$(cut -d'_' -f1 <<< "$file_base")"
+    runner="$(cut -d'_' -f2 <<< "$file_base" | cut -d'.' -f1 | cut -d'_' -f1)"
+    expected_file="$expected_dir/$(cut -d'.' -f1 <<< "$file_base")"
+    if [ -f "$expected_file" ]; then
+        expected="$(cat "$expected_file")"
+    else
+        expected="Editor exited successfully
+――――――――――――――――――――――――――
+
+ruc test passed"
+    fi
+    code=0
+    actual="$(EDITOR=test_editor $exe --cache-dir "$cache_dir" "$lang" -r "$runner" 2>/dev/null)" || code=$?
+    if [ $code -ne 0 ] ; then
+        bad_exit "$runner" "$lang" $code "$actual"
+    fi
+    if [ "$actual" != "$expected" ]; then
+        bad_output "$runner" "$lang" "$expected" "$actual"
+    fi
+    printf "Language: %s; Runner: %s; ${green}passed${reset}\n" "$lang" "$runner"
+done

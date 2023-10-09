@@ -58,6 +58,10 @@ compile the project.
 
 Running `cargo build` should build everything.
 
+A (fairly rudimentary) set of tests is available and can be ran using
+`nix-shell --run 'run_tests'` (or `./scripts/run_tests` if you have all the
+languages installed on your machine).
+
 This project uses a pre-commit hook in order to check that the project version
 in `Cargo.toml` has been updated, please run the following to enable the hook
 

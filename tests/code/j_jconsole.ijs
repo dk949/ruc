@@ -1,0 +1,1 @@
+echo 'ruc test passed'
