@@ -4,7 +4,7 @@ Runner {
     exe_idx: 0,
     exe_deps: &["scala3", "scala"],
     other_deps: &[],
-    supported_langs: &["scala", ],
+    supported_langs: &["scala3", ],
     default_for: &["scala3",],
     setup: &[],
     exe_args_pre: &[],
