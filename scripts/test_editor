@@ -8,5 +8,5 @@ import shutil
 
 test_dir = Path(__file__).parent.parent / "tests" / "code"
 file = sys.argv[1]
-code = test_dir/ os.path.basename(file)
-shutil.copy(code, file)
+code = test_dir / os.path.basename(file)
+_ = shutil.copy(code, file)
