@@ -1,0 +1,13 @@
+Runner {
+    name: "nvim",
+    extension: "lua",
+    exe_idx: 0,
+    exe_deps: &["nvim"],
+    other_deps: &[],
+    supported_langs: &["lua"],
+    default_for: &[],
+    setup: &[],
+    exe_args_pre: &["-l"],
+    exe_args_post: &[],
+    teardown: &[],
+}
