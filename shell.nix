@@ -46,6 +46,7 @@ pkgs.mkShell {
         pkgs.zig
         pkgs.zsh
 
+        pkgs.neovim
         pkgs.vim
         pkgs.nano
         pkgs.gedit
