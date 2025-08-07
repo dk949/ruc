@@ -1,6 +1,6 @@
 Runner {
     name: "ts-node",
-    extension: "ts",
+    extension: "cts",
     exe_idx: 0,
     exe_deps: &["ts-node", ],
     other_deps: &[],
