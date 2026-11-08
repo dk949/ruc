@@ -506,7 +506,7 @@ impl Exe {
 }
 
 impl Runner {
-    const NATIVE: usize = std::usize::MAX;
+    const NATIVE: usize = usize::MAX;
     fn get_exe(self: &Self) -> Error<Exe> {
         if self.exe_idx == Self::NATIVE {
             if !self.exe_args_pre.is_empty() {
