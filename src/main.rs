@@ -232,7 +232,7 @@ fn parse_args() -> Args {
         die!(Codes::ArgumentError, "Expected exactly one language")
     }
 
-    return Args {
+    Args {
         hist,
         list,
         cache_dir,
@@ -241,7 +241,7 @@ fn parse_args() -> Args {
         prog_args,
         runner,
         lang,
-    };
+    }
 }
 
 fn list(kind: List, lang: &str, aliases: &Aliases, runners: &Runners) -> Error<()> {
@@ -279,7 +279,7 @@ fn list(kind: List, lang: &str, aliases: &Aliases, runners: &Runners) -> Error<(
                     for l in it {
                         print!(", {}", l);
                     }
-                    println!("");
+                    println!();
                 }
             } else {
                 for runner in runners.runners {
@@ -295,7 +295,7 @@ fn list(kind: List, lang: &str, aliases: &Aliases, runners: &Runners) -> Error<(
 
 const INDENT: usize = 4;
 
-fn output_printer(v: &Vec<u8>, indent: usize) {
+fn output_printer(v: &[u8], indent: usize) {
     let str = String::from_utf8_lossy(v);
     for line in str.split('\n') {
         println!("{:indent$}", line);
@@ -335,12 +335,12 @@ fn check_status_impl(
                     Ok(s.to_string())
                 }
             })
-            .fold(Ok(String::new()), |acc, s| {
+            .try_fold(String::new(), |acc, s| {
                 if let Ok(s) = s {
                     if s.is_empty() {
-                        acc
+                        Ok(acc)
                     } else {
-                        Ok(acc? + &s + " ")
+                        Ok(acc + &s + " ")
                     }
                 } else {
                     s
@@ -351,11 +351,11 @@ fn check_status_impl(
         } else {
             println!("{exe} was closed by a signal");
         }
-        if res.stdout.len() > 0 {
+        if !res.stdout.is_empty() {
             print!("stdout:\n\n\n");
             output_printer(&res.stdout, INDENT);
         }
-        if res.stderr.len() > 0 {
+        if !res.stderr.is_empty() {
             print!("\nstderr:\n\n\n");
             output_printer(&res.stderr, INDENT);
         }
@@ -363,12 +363,12 @@ fn check_status_impl(
     }
 }
 
-fn find_exe<'a>(dep: &'a str) -> Option<&'a str> {
+fn find_exe(dep: &str) -> Option<&str> {
     // https://stackoverflow.com/a/37499032
     if env::var_os("PATH")
         .and_then(|paths| {
             env::split_paths(&paths).find_map(|dir| {
-                let full_path = dir.join(&dep);
+                let full_path = dir.join(dep);
                 if full_path.is_file() {
                     Some(full_path)
                 } else {
@@ -430,12 +430,7 @@ mod template {
     pub(crate) fn sub<'a>(inp: &'a str, conf: &Conf<'a>, out_name: &mut String) -> Error<String> {
         let mut modified: Option<String> = None;
         for (find, replace) in conf {
-            if let Some(idx) = modified
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or(inp)
-                .find(find)
-            {
+            if let Some(idx) = modified.as_deref().unwrap_or(inp).find(find) {
                 modified = match modified {
                     Some(modified) => {
                         let new_modified = modified.replace(find, replace.string);
@@ -497,7 +492,7 @@ enum Exe {
 }
 
 impl Exe {
-    fn as_str(self: &Self) -> &'static str {
+    fn as_str(&self) -> &'static str {
         match self {
             Exe::Str(s) => s,
             Exe::Native => "",
@@ -507,7 +502,7 @@ impl Exe {
 
 impl Runner {
     const NATIVE: usize = usize::MAX;
-    fn get_exe(self: &Self) -> Error<Exe> {
+    fn get_exe(&self) -> Error<Exe> {
         if self.exe_idx == Self::NATIVE {
             if !self.exe_args_pre.is_empty() {
                 dier!(
@@ -528,18 +523,18 @@ impl Runner {
         let mut idx = 0;
         let dep = list.iter().find_map(|s| {
             idx += 1;
-            find_exe(*s)
+            find_exe(s)
         });
         dep.map(|_| idx - 1)
     }
-    fn check_deps(self: &mut Self) -> Result<(), &'static [&'static str]> {
+    fn check_deps(&mut self) -> Result<(), &'static [&'static str]> {
         self.exe_idx = if self.exe_deps.is_empty() {
             Self::NATIVE
         } else {
             Self::check_dep_list(self.exe_deps).ok_or(self.exe_deps)?
         };
         for deps in self.other_deps {
-            Self::check_dep_list(*deps).ok_or(*deps)?;
+            Self::check_dep_list(deps).ok_or(*deps)?;
         }
         Ok(())
     }
@@ -550,7 +545,7 @@ impl Runner {
         conf: &template::Conf,
         out_name: &mut String,
     ) -> Error<()> {
-        if cmds.len() == 0 {
+        if cmds.is_empty() {
             return Ok(());
         }
 
@@ -570,8 +565,7 @@ impl Runner {
             Ok(())
         }
 
-        let mut cmds_it = cmds.iter().take(cmds.len() - 1);
-        while let Some(cmd) = cmds_it.next() {
+        for cmd in cmds.iter().take(cmds.len() - 1) {
             exec(cmd, conf, out_name)?;
         }
         let cmd = cmds.last().ok_or_else(|| {
@@ -594,7 +588,7 @@ impl Runner {
         Ok(())
     }
 
-    fn run_exe(self: &Self, file: &Path, args: &[String]) -> Error<()> {
+    fn run_exe(&self, file: &Path, args: &[String]) -> Error<()> {
         let exe = self.get_exe()?;
         let is_native = matches!(exe, Exe::Native);
         let mut cmd = Command::new(if is_native {
@@ -624,7 +618,7 @@ impl Runner {
             &[
                 &[exe.as_str()],
                 self.exe_args_pre,
-                &[&file.to_str_or_die()?],
+                &[file.to_str_or_die()?],
                 self.exe_args_post,
             ]
             .concat(),
@@ -637,7 +631,7 @@ impl Runner {
     // TODO(dk949): make it possible to refer to teh main executable and other dependencies through
     //              template strings.
     fn run(
-        self: &Self,
+        &self,
         lang: &str,
         file: &Path,
         compiler_args: &[String],
@@ -675,18 +669,16 @@ impl Runners {
             runners: include!(concat!(env!("OUT_DIR"), "/runners_list")),
         }
     }
-    fn get<'a>(self: &Self, name: &'a str, lang: &'a str) -> Option<Error<&'a Runner>> {
+    fn get<'a>(&self, name: &'a str, lang: &'a str) -> Option<Error<&'a Runner>> {
         for r in self.runners {
-            if r.name == name {
-                if r.supported_langs.contains(&lang) {
-                    return Some(Ok(r));
-                }
+            if r.name == name && r.supported_langs.contains(&lang) {
+                return Some(Ok(r));
             }
         }
         None
     }
 
-    fn runner_for_lang<'a>(self: &Self, lang: &'a str) -> Error<&Runner> {
+    fn runner_for_lang(&self, lang: &str) -> Error<&Runner> {
         for r in self.runners {
             if r.default_for.contains(&lang) {
                 return Ok(r);
@@ -695,7 +687,7 @@ impl Runners {
         Err(Codes::InternalError)
     }
 
-    fn determine<'a>(self: &Self, user_runner: Option<&'a String>, lang: &'a str) -> Error<Runner> {
+    fn determine<'a>(&self, user_runner: Option<&'a String>, lang: &'a str) -> Error<Runner> {
         let runner = if let Some(runner) = user_runner {
             if let Some(r) = self.get(runner.as_str(), lang) {
                 r.or_else(|c| {
@@ -730,7 +722,7 @@ impl Runners {
         for dep in it {
             print!(" or {}", dep);
         }
-        println!("");
+        println!();
 
         Err(Codes::DependencyError)
     }
@@ -771,33 +763,33 @@ fn determine_lang<'a>(args: &'a Args, aliases: &'a Aliases) -> Error<&'a str> {
 }
 
 trait ToErrorCode<T> {
-    fn to_code(self: Self, context: &str) -> Error<T>;
+    fn to_code(self, context: &str) -> Error<T>;
 }
 
 impl ToErrorCode<fs::File> for io::Result<fs::File> {
-    fn to_code(self: Self, filename: &str) -> Error<fs::File> {
+    fn to_code(self, filename: &str) -> Error<fs::File> {
         self.or_else(|e| dier!(Codes::FileError, "Could not create '{filename}': {e}"))
     }
 }
 
 impl ToErrorCode<process::Output> for io::Result<process::Output> {
-    fn to_code(self: Self, exe: &str) -> Error<process::Output> {
+    fn to_code(self, exe: &str) -> Error<process::Output> {
         self.or_else(|e| dier!(Codes::EditorError, "{exe} could not be started: {e}"))
     }
 }
 
 impl ToErrorCode<()> for io::Result<()> {
-    fn to_code(self: Self, _: &str) -> Error<()> {
+    fn to_code(self, _: &str) -> Error<()> {
         self.or_else(|e| dier!(Codes::FileError, "Could not create a temporary file: {e}"))
     }
 }
 
 trait ToStrOrDie {
-    fn to_str_or_die(self: &Self) -> Error<&str>;
+    fn to_str_or_die(&self) -> Error<&str>;
 }
 
 impl ToStrOrDie for Path {
-    fn to_str_or_die(self: &Self) -> Error<&str> {
+    fn to_str_or_die(&self) -> Error<&str> {
         self.to_str()
             .ok_or_else(|| dieo!(Codes::InternalError, "Could not convert path to str"))
     }
@@ -808,18 +800,18 @@ const CACHE_DIR: &str = "ruc_cache";
 fn add_prefix(lang: &str, runner: &str) -> String {
     let mut out = String::from(lang);
     out.extend(['_'].iter());
-    out.extend(runner.chars());
+    out.push_str(runner);
 
-    return out;
+    out
 }
 
-fn cache_file_name(dir: &PathBuf, lang: &str, runner: &str, extension: &str) -> PathBuf {
+fn cache_file_name(dir: &Path, lang: &str, runner: &str, extension: &str) -> PathBuf {
     let mut file = dir.join(add_prefix(lang, runner));
     file.set_extension(extension);
-    return file;
+    file
 }
 
-fn cache_file_path(cache: &PathBuf, lang: &str, runner: &str, extension: &str) -> Error<PathBuf> {
+fn cache_file_path(cache: &Path, lang: &str, runner: &str, extension: &str) -> Error<PathBuf> {
     let cache_dir = cache.join(CACHE_DIR);
     fs::create_dir_all(&cache_dir).or_else(|e| {
         dier!(
@@ -833,7 +825,7 @@ fn cache_file_path(cache: &PathBuf, lang: &str, runner: &str, extension: &str) -
 
 fn setup_hist<'a>(
     hist: Hist,
-    cache_dir: &PathBuf,
+    cache_dir: &Path,
     lang: &'a str,
     runner: &str,
     extension: &str,
@@ -866,7 +858,7 @@ fn setup_hist<'a>(
 
     writeln!(file, "{}", snippet)
         .to_code(format!("Could not write to file '{}'", path.to_string_lossy()).as_str())?;
-    return Ok(path);
+    Ok(path)
 }
 
 fn cleanup_temp(hist: &Hist, hist_path: &PathBuf) -> Error<()> {
@@ -882,7 +874,7 @@ fn cleanup_temp(hist: &Hist, hist_path: &PathBuf) -> Error<()> {
     Ok(())
 }
 
-fn editor(user_editor: &String) -> Error<String> {
+fn editor(user_editor: &str) -> Error<String> {
     let editor = if user_editor.is_empty() {
         env::var_os("EDITOR")
             .ok_or_else(|| dieo!(
@@ -893,7 +885,7 @@ fn editor(user_editor: &String) -> Error<String> {
             .to_string_lossy()
             .to_string()
     } else {
-        user_editor.clone()
+        user_editor.to_owned()
     };
 
     find_exe(&editor)
@@ -937,7 +929,7 @@ fn program(args: Args) -> Error<()> {
     let editor = editor(&args.editor)?;
 
     run_editor(&editor, &hist_path.as_os_str().to_string_lossy())?;
-    let run_res = runner.run(&lang, &hist_path, &args.compiler_args, &args.prog_args);
+    let run_res = runner.run(lang, &hist_path, &args.compiler_args, &args.prog_args);
     cleanup_temp(&args.hist, &hist_path)?;
     run_res
 }
